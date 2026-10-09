@@ -201,12 +201,13 @@ const TITLES = [
   {v:"Kıdemli Saha Servis Mühendisi", f:"field", s:1},
   {v:"Aplikasyon Uzmanı", f:"app", s:0},
   {v:"Kıdemli Aplikasyon Uzmanı", f:"app", s:1},
-  {v:"Atölye Destek Teknisyeni / Uzmanı", f:"work", s:0},
-  {v:"Kıdemli Atölye Destek Uzmanı", f:"work", s:1}
+  {v:"Atölye Destek Teknisyeni / Uzmanı", f:"work", s:0}
 ];
 /* Hedef yalnızca bir üst basamak veya yatay geçiş olabilir; mevcut rolün kendisi/altı ve kendi alanına yatay geçiş çıkmaz */
 const eligible=(t,title)=>{
-  if(t.id==="senior") return title.s===0;
+  if(title.f==="work") return t.id==="tofield";   // atölye çalışanının tek hedefi: saha servis mühendisliği
+  if(t.id==="senior") return title.s===0 && title.f!=="work";   // atölyede kıdemli basamak hedef olarak sunulmaz
+  if(t.id==="tofield") return title.f==="work";   // atölye çalışanının doğal kariyer yolu: sahaya geçiş
   return true;
 };
 const YEARS = [
@@ -218,8 +219,12 @@ const TARGETS = [
   {id:"lead", n:"Takım Lideri / Teknik Lider", type:"vertical", req:[4,75,75,65]},
   {id:"mgr", n:"Manager (Servis / Destek Müdürü)", type:"vertical", req:[4,65,80,85]},
   {id:"trainer", n:"Teknik Eğitmen / Trainer", type:"lateral", req:[4,75,85,55]},
-  {id:"prod", n:"Ürün / Çözüm Uzmanı (Product Specialist)", type:"lateral", req:[4,75,75,70]}
+  {id:"prod", n:"Ürün / Çözüm Uzmanı (Product Specialist)", type:"lateral", req:[4,75,75,70]},
+  {id:"tofield", n:"Saha Servis Mühendisi (atölyeden sahaya geçiş)", type:"lateral", req:[3,75,65,45]}
 ];
+// "Kıdemli" hedefin adı kişinin kendi alanına göre belirlenir
+const SENIOR_NAME={field:"Kıdemli Saha Servis Mühendisi (Teknik Referans)", app:"Kıdemli Aplikasyon Uzmanı (Teknik Referans)", work:"Kıdemli Atölye Destek Teknisyeni / Uzmanı (Teknik Referans)"};
+const applyFamily=f=>{ const s=TARGETS.find(x=>x.id==="senior"); if(SENIOR_NAME[f]) s.n=SENIOR_NAME[f]; };
 const ANCHORS = {
   TF:"Teknik / Fonksiyonel Yetkinlik", GM:"Genel Yönetim", AU:"Özerklik / Bağımsızlık", SE:"Güvenlik / İstikrar",
   EC:"Girişimci Yaratıcılık", SV:"Hizmet / Adanmışlık", CH:"Saf Meydan Okuma", LS:"Yaşam Tarzı Dengesi"
@@ -609,7 +614,7 @@ function renderIntro(){
 
     <label for="target">3. Hedeflediğiniz bir sonraki pozisyon nedir?</label>
     <select id="target"></select>
-    <div class="hint">Emin değilseniz son seçeneği işaretleyin; profilinize en uygun hedefi raporda ben belirleyeceğim.</div>
+    <div class="hint" id="thint">Emin değilseniz son seçeneği işaretleyin; profilinize en uygun hedefi raporda ben belirleyeceğim.</div>
 
     <div class="row"><span></span><button class="btn" id="go" disabled>Değerlendirmeye başla →</button></div>
   </div>`);
@@ -619,11 +624,15 @@ function renderIntro(){
   // hedef listesi, seçilen mevcut role göre süzülür
   const fillTargets=(keep)=>{
     const ti = nTitle.value===""?null:TITLES[nTitle.value];
+    if(ti) applyFamily(ti.f);
     const list = ti ? TARGETS.filter(t=>eligible(t,ti)) : [];
-    nTarget.innerHTML = `<option value="">${ti?"Seçiniz…":"Önce mevcut unvanınızı seçin"}</option>`
+    const single = list.length===1;   // tek hedef varsa seçim zorunlu değil, otomatik seçilir
+    nTarget.innerHTML = (single?"":`<option value="">${ti?"Seçiniz…":"Önce mevcut unvanınızı seçin"}</option>`)
       + list.map(t=>`<option value="${t.id}">${esc(t.n)}</option>`).join("")
-      + (ti?`<option value="none">Henüz emin değilim, bana önerin</option>`:"");
-    nTarget.value = [...nTarget.options].some(o=>o.value===keep) ? keep : "";
+      + (ti&&!single?`<option value="none">Henüz emin değilim, bana önerin</option>`:"");
+    nTarget.value = single ? list[0].id : ([...nTarget.options].some(o=>o.value===keep) ? keep : "");
+    const th=document.getElementById("thint");
+    if(th) th.textContent = single ? "Bu rolün kariyer planı saha servis mühendisliğine geçiş üzerine kurulur." : "Emin değilseniz son seçeneği işaretleyin; profilinize en uygun hedefi raporda ben belirleyeceğim.";
   };
   nName.value=S.name; nTitle.value=S.titleIdx; nYears.value=S.yearsIdx;
   fillTargets(S.targetNone ? "none" : S.targetId); chk();
@@ -855,6 +864,7 @@ function renderQuestion(qi){
 /* ============ HESAPLAMA ============ */
 function compute(){
   const family=TITLES[S.titleIdx].f, years=YEARS[S.yearsIdx].n;
+  applyFamily(family);
   let sumD=0,nD=0, T=0,H=0,C=0, mT=0,mH=0,mC=0;
   const anc={TF:0,GM:0,AU:0,SE:0,EC:0,SV:0,CH:0,LS:0};
   QUESTIONS.forEach((q,qi)=>{
@@ -886,7 +896,11 @@ function compute(){
   // boyutu en fazla 8 puan geride ve toplam uyum en az %60. Aksi halde hazır olmayan birini yönetici rolüne yönlendirmiş oluruz.
   const VERTICAL_BONUS=25, VERTICAL_MIN_FIT=60;
   const ready=t=>{ const [rd,rt,rh,rc]=t.req; return dreyfus>=rd-0.5 && tech>=rt-8 && human>=rh-8 && conc>=rc-8; };
-  const rank=x=>x.fit+(x.t.type==="vertical"&&x.fit>=VERTICAL_MIN_FIT&&ready(x.t)?VERTICAL_BONUS:0);
+  // Atölye çalışanının doğal kariyer yolu saha servistir: uyum en az %50 ise öneride öncelik alır
+  const FIELD_MOVE_BONUS=40, FIELD_MOVE_MIN_FIT=50;
+  const rank=x=>x.fit
+    +(x.t.type==="vertical"&&x.fit>=VERTICAL_MIN_FIT&&ready(x.t)?VERTICAL_BONUS:0)
+    +(x.t.id==="tofield"&&x.fit>=FIELD_MOVE_MIN_FIT?FIELD_MOVE_BONUS:0);
   const pick=()=>[...scored].sort((a,b)=>rank(b)-rank(a))[0];
   const target = suggested ? pick() : scored.find(x=>x.t.id===S.targetId);
 
@@ -952,6 +966,10 @@ const PHASES = {
   ["6–12 ay · Hazırlık",["Hedef rol için gerekli platform, uygulama veya eğitmen sertifikalarını tamamlayın","Kısa süreli rotasyon veya geçici görevlendirme talep edin","Mevcut rolünüzdeki bilgiyi dokümante ederek devre hazır hale getirin"]],
   ["12–24 ay · Geçiş",["Resmi rol geçişi ve ilk 90 gün planı","Eski ekiple 'köprü' rolü (saha-aplikasyon-atölye bilgi aktarımı)","Yeni rolde ilk 6 ay için başarı ölçütlerini yöneticinizle yazılı belirleyin"]]]
 };
+PHASES.toField=[
+  ["0–6 ay · Keşif",["Saha servis ekibiyle ride-along (sahaya eşlik) yapın, 2–3 müşteri ziyaretine katılın","Atölyede gördüğünüz arızaların sahadaki karşılığını ve müşteriye etkisini öğrenin","Saha mühendisi yetkinlik matrisini isteyin ve eksiklerinizi çıkarın"]],
+  ["6–12 ay · Hazırlık",["Hedef platform için saha servis eğitim ve sertifikalarını tamamlayın","Müşteri iletişimi, zor görüşme yönetimi, seyahat ve saha güvenliği kurallarını öğrenin","Kısa süreli saha rotasyonu veya geçici görevlendirme talep edin"]],
+  ["12–24 ay · Geçiş",["Mentor eşliğinde saha çalışması ve resmi rol geçişi; ilk 90 gün planı","Atölyedeki arıza ve onarım bilginizi saha ekibine aktaran bir 'köprü' rolü üstlenin","Yeni rolde ilk 6 ay için başarı ölçütlerini yöneticinizle yazılı belirleyin"]]];
 const LATERAL_DEST = {
   field:"Aplikasyon Uzmanı, Teknik Eğitmen veya Ürün/Çözüm Uzmanı",
   app:"Saha Servis (karma rol), Teknik Eğitmen veya Ürün/Çözüm Uzmanı",
@@ -1103,7 +1121,8 @@ function renderReport(){
   if(R.suggested && t.type==="vertical" && fit<70){
     mismatch+=`<p><strong>Not:</strong> Dikey yükselişi öncelikli tuttuğum için bu pozisyonu önerdim; mevcut uyumunuz %${fit}. Aşağıdaki 'Geliştirilmesi gereken yetkinlikler' bölümü bu farkı kapatmak için ilk odak noktanız olmalı.</p>`;
   }
-  const phases=PHASES[top.id];
+  const toField = t.id==="tofield";
+  const phases = toField ? PHASES.toField : PHASES[top.id];
   const verdict = fit>=80?"Profiliniz hedefle büyük ölçüde örtüşüyor; kısa vadede hazır olmanızı sağlayacak küçük gelişim adımları yeterli olabilir."
     : fit>=60?"Temel uyum var; birkaç belirli yetkinlikte hedeflenmiş gelişim ile 12–18 ay içinde güçlü aday olabilirsiniz."
     : "Hedef ile mevcut profil arasında belirgin bir fark var; bu bir engel değil, planlı bir gelişim yolculuğu gerektiriyor.";
@@ -1165,8 +1184,8 @@ function renderReport(){
       <h3>${ico("map")}Kariyer Yolu Haritası</h3>
       ${R.routes.map((r,i)=>routeBlock(r,i===0)).join("")}
       ${mismatch}
-      <p style="margin:12px 0 4px"><strong>${esc(top.n)}</strong> rotası için önerilen adımlar:</p>
-      ${top.id==="lateral"?`<p class="hint" style="margin-top:0">Rolünüze göre olası yatay hedefler: ${esc(LATERAL_DEST[R.family])}.</p>`:""}
+      <p style="margin:12px 0 4px"><strong>${toField?"Saha Servis Mühendisliğine geçiş":esc(top.n)}</strong> ${toField?"için önerilen adımlar:":"rotası için önerilen adımlar:"}</p>
+      ${!toField&&top.id==="lateral"?`<p class="hint" style="margin-top:0">Rolünüze göre olası yatay hedefler: ${esc(LATERAL_DEST[R.family])}.</p>`:""}
       <div class="phases">
         ${phases.map(ph=>`<div class="phase"><h5>${ph[0]}</h5><ul>${ph[1].map(x=>`<li>${x}</li>`).join("")}</ul></div>`).join("")}
       </div>
