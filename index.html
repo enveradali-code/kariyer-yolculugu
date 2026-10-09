@@ -334,11 +334,13 @@ const QUESTIONS = [
    ];}},
  { id:"tradeoff", scene:6, tag:"Motivasyon · Ödünleşim",
    scenario(){ return "Kariyerinizde aynı anda iki şeyi elde edemeyeceğiniz bir noktadasınız. Aşağıdaki tekliflerden hangisini seçerdiniz?"; },
-   options(){ return [
+   options(ctx){ return [
      {...O("Maaşta %15 artış sağlayan, ama yeni bir şey öğrenmeyeceğiniz rutin bir rol.",0,0,0,0,{}), m:"ext", x:"pay"},
      {...O("Maaş aynı kalır, ama şirketin en yeni ve en zor platformunda çalışırsınız.",0,0,0,0,{}), m:"growth"},
      {...O("Daha üst bir unvan verilir, ancak teknik işten uzaklaşırsınız ve maaş artışı çok küçük kalır.",0,0,0,0,{}), m:"ext", x:"title"},
-     {...O("Maaş ve unvan aynı kalır, ama esnek çalışma düzeni elde eder, seyahatiniz azalır.",0,0,0,0,{}), m:"auto"},
+     {...O((ctx&&ctx.family==="work")
+        ? "Maaş ve unvan aynı kalır, ama esnek mesai saatleri ve daha öngörülebilir bir iş yükü elde edersiniz."
+        : "Maaş ve unvan aynı kalır, ama esnek çalışma düzeni elde eder, seyahatiniz azalır.",0,0,0,0,{}), m:"auto"},
      {...O("Mevcut durumunuzu korur; güvenli bir kadro ve öngörülebilir bir görev tanımıyla devam edersiniz.",0,0,0,0,{}), m:"sec"}
    ];}},
  { id:"values", type:"rank", scene:6, tag:"Motivasyon · Değer Sıralaması",
