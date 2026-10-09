@@ -626,13 +626,12 @@ function renderIntro(){
     const ti = nTitle.value===""?null:TITLES[nTitle.value];
     if(ti) applyFamily(ti.f);
     const list = ti ? TARGETS.filter(t=>eligible(t,ti)) : [];
-    const single = list.length===1;   // tek hedef varsa seçim zorunlu değil, otomatik seçilir
-    nTarget.innerHTML = (single?"":`<option value="">${ti?"Seçiniz…":"Önce mevcut unvanınızı seçin"}</option>`)
+    nTarget.innerHTML = `<option value="">${ti?"Seçiniz…":"Önce mevcut unvanınızı seçin"}</option>`
       + list.map(t=>`<option value="${t.id}">${esc(t.n)}</option>`).join("")
-      + (ti&&!single?`<option value="none">Henüz emin değilim, bana önerin</option>`:"");
-    nTarget.value = single ? list[0].id : ([...nTarget.options].some(o=>o.value===keep) ? keep : "");
+      + (ti?`<option value="none">Henüz emin değilim, bana önerin</option>`:"");
+    nTarget.value = [...nTarget.options].some(o=>o.value===keep) ? keep : "";
     const th=document.getElementById("thint");
-    if(th) th.textContent = single ? "Bu rolün kariyer planı saha servis mühendisliğine geçiş üzerine kurulur." : "Emin değilseniz son seçeneği işaretleyin; profilinize en uygun hedefi raporda ben belirleyeceğim.";
+    if(th) th.textContent = (ti&&ti.f==="work" ? "Bu rolün kariyer planı saha servis mühendisliğine geçiş üzerine kurulur. " : "") + "Emin değilseniz son seçeneği işaretleyin; profilinize en uygun hedefi raporda ben belirleyeceğim.";
   };
   nName.value=S.name; nTitle.value=S.titleIdx; nYears.value=S.yearsIdx;
   fillTargets(S.targetNone ? "none" : S.targetId); chk();
