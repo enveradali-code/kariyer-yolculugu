@@ -216,9 +216,9 @@ const YEARS = [
 /* req: dreyfus, tech, human, conc | type: vertical | expert | lateral */
 const TARGETS = [
   {id:"senior", n:"Kıdemli Uzman / Teknik Referans (SME)", type:"expert", req:[4,85,65,55]},
-  {id:"lead", n:"Takım Lideri / Teknik Lider", type:"vertical", req:[4,75,75,65]},
+  {id:"lead", n:"Proje Lideri", type:"vertical", req:[4,75,75,65]},
   {id:"mgr", n:"Manager (Servis / Destek Müdürü)", type:"vertical", req:[4,65,80,85]},
-  {id:"trainer", n:"Teknik Eğitmen / Trainer", type:"lateral", req:[4,75,85,55]},
+  {id:"trainer", n:"Eğitmen", type:"lateral", req:[4,75,85,55]},
   {id:"prod", n:"Ürün / Çözüm Uzmanı (Product Specialist)", type:"lateral", req:[4,75,75,70]},
   {id:"tofield", n:"Saha Servis Mühendisi (atölyeden sahaya geçiş)", type:"lateral", req:[3,75,65,45]}
 ];
@@ -976,7 +976,7 @@ const PHASES = {
  vertical:[
   ["0–6 ay · Temel",["Ekip içinde gayriresmi teknik lider rolü alın (vaka paylaşımı, onboarding desteği)","Yöneticinizle hedef pozisyon için beklentileri netleştiren bir 1:1 yapın","Bir junior'a mentorluk üstlenin"]],
   ["6–12 ay · Kanıt",["Ölçülebilir bir iyileştirme projesi yürütün (MTTR, ilk seferde çözüm vb.)","Liderlik, koçluk ve çatışma yönetimi eğitimi alın","Kalite ve ürün ekipleriyle çapraz iş birliği kurun"]],
-  ["12–24 ay · Geçiş",["Vekâleten takım liderliği / proje sorumluluğu alın","Bütçe, kapasite planlama ve KPI yönetimi deneyimi edinin","Aday havuzu / yetenek değerlendirmesine girin"]]],
+  ["12–24 ay · Geçiş",["Vekâleten proje liderliği / sorumluluğu alın","Bütçe, kapasite planlama ve KPI yönetimi deneyimi edinin","Aday havuzu / yetenek değerlendirmesine girin"]]],
  expert:[
   ["0–6 ay · Derinleşme",["En kritik platform/modülde ileri seviye sertifikasyon hedefleyin","Zor vakaları dokümante edip bilgi tabanına ekleyin","Üretici/ürün destek ekipleriyle doğrudan çalışma ilişkisi kurun"]],
   ["6–12 ay · Görünürlük",["Ekip içi teknik eğitimler verin, 'ilk başvurulan kişi' olun","Yeni ürün lansmanlarında pilot/doğrulama rolü alın","Kök neden analizi standartlarını ekip adına siz oluşturun"]],
@@ -991,8 +991,8 @@ PHASES.toField=[
   ["6–12 ay · Hazırlık",["Hedef platform için saha servis eğitim ve sertifikalarını tamamlayın","Müşteri iletişimi, zor görüşme yönetimi, seyahat ve saha güvenliği kurallarını öğrenin","Kısa süreli saha rotasyonu veya geçici görevlendirme talep edin"]],
   ["12–24 ay · Geçiş",["Mentor eşliğinde saha çalışması ve resmi rol geçişi; ilk 90 gün planı","Atölyedeki arıza ve onarım bilginizi saha ekibine aktaran bir 'köprü' rolü üstlenin","Yeni rolde ilk 6 ay için başarı ölçütlerini yöneticinizle yazılı belirleyin"]]];
 const LATERAL_DEST = {
-  field:"Aplikasyon Uzmanı, Teknik Eğitmen veya Ürün/Çözüm Uzmanı",
-  app:"Saha Servis (karma rol), Teknik Eğitmen veya Ürün/Çözüm Uzmanı",
+  field:"Aplikasyon Uzmanı, Eğitmen veya Ürün/Çözüm Uzmanı",
+  app:"Saha Servis (karma rol), Eğitmen veya Ürün/Çözüm Uzmanı",
   work:"Saha Servis Mühendisi (atölyeden sahaya geçiş), Teknik Destek veya Kalite Uzmanlığı",
   lead:"Eğitim, Ürün/Çözüm veya Kalite/Operasyon fonksiyonları"
 };
@@ -1105,7 +1105,7 @@ function managerReadiness(R){
       <li>Teknik, beşeri ve kavramsal becerinizin her biri hedefin en fazla 8 puan altında veya üstünde.</li>
       <li>Dreyfus seviyeniz en az ${(rd-0.5).toFixed(1)}.</li>
       <li>En az bir ölçülebilir iyileştirme projesi veya vekâleten liderlik deneyiminiz var.</li>
-      <li>Yöneticiniz sizi ekip lideri adayı olarak görüyor ve bunu yazılı geri bildirimle teyit edebiliyor.</li>
+      <li>Yöneticiniz sizi proje lideri adayı olarak görüyor ve bunu yazılı geri bildirimle teyit edebiliyor.</li>
     </ul>
     ${userVertical?"":`<p class="hint">Not: Şu anki profilinize en uygun hedef <strong>${esc(t0.n)}</strong> olarak önerildi. Dikey yol buna paralel veya sonrası için bir seçenek olarak durabilir.</p>`}
   </div>`;
