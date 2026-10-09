@@ -820,9 +820,11 @@ function compute(){
   const scored=TARGETS.filter(t=>eligible(t,TITLES[S.titleIdx])).map(t=>({t,fit:fit(t)})).sort((a,b)=>b.fit-a.fit);
   const suggested=!S.targetId;
   // öneri modunda dikey yükselişe öncelik: sıralamaya +25 puan (gösterilen uyum skoru değişmez).
-  // Yalnızca uyumu en az %55 olan dikey roller bonus alır; çok uzak bir role yönlendirmemek için.
-  const VERTICAL_BONUS=25, VERTICAL_MIN_FIT=55;
-  const rank=x=>x.fit+(x.t.type==="vertical"&&x.fit>=VERTICAL_MIN_FIT?VERTICAL_BONUS:0);
+  // Bonus yalnızca profil o role gerçekten yakınsa verilir: Dreyfus en fazla 0,5 seviye, her beceri
+  // boyutu en fazla 8 puan geride ve toplam uyum en az %60. Aksi halde hazır olmayan birini yönetici rolüne yönlendirmiş oluruz.
+  const VERTICAL_BONUS=25, VERTICAL_MIN_FIT=60;
+  const ready=t=>{ const [rd,rt,rh,rc]=t.req; return dreyfus>=rd-0.5 && tech>=rt-8 && human>=rh-8 && conc>=rc-8; };
+  const rank=x=>x.fit+(x.t.type==="vertical"&&x.fit>=VERTICAL_MIN_FIT&&ready(x.t)?VERTICAL_BONUS:0);
   const pick=()=>[...scored].sort((a,b)=>rank(b)-rank(a))[0];
   const target = suggested ? pick() : scored.find(x=>x.t.id===S.targetId);
 
@@ -831,7 +833,7 @@ function compute(){
   const L=Math.max(0.5, (anc.SV+anc.EC*1.5+anc.AU*0.7)*1.5 + (human-50)/15);
   // öneri modunda dikey rota da öne çıkarılır (hedef dikey bir rol seçildiyse)
   // dikey hedef önerildiyse rota da tutarlı olsun: dikey, en güçlü rakibinin %5 üstüne çıkar
-  const vBoost = (suggested && target.t.type==="vertical") ? Math.max(1.6, Math.max(E,L)/V*1.05) : 1;
+  const vBoost = (suggested && target.t.type==="vertical" && ready(target.t)) ? Math.max(1.6, Math.max(E,L)/V*1.05) : 1;
   const sum=V*vBoost+E+L;
   const routes=[
     {id:"vertical",n:"Dikey Yükselme (Yöneticilik)",s:V*vBoost/sum},
