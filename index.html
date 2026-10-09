@@ -1,0 +1,1113 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kariyer Öz Değerlendirme Asistanı</title>
+<style>
+:root{
+  --bg:#fff4e8; --card:#fffdf9; --ink:#2b2018; --muted:#7a6554; --line:#f1ddc9;
+  --brand:#d9480f; --brand-ink:#ffffff; --brand-soft:#ffe9d9; --good:#1b7a52; --good-soft:#dff3e8;
+  --warn:#b45309; --warn-soft:#fff0cf; --bad:#b42318;
+  --teal:#0e8a8c; --gold:#f2a516; --plum:#a23b72;
+  --g0:linear-gradient(120deg,#ff7a45,#f7a23a); --g1:linear-gradient(120deg,#14a3a0,#5bbf7a);
+  --g2:linear-gradient(120deg,#f2a516,#ee7b30); --g3:linear-gradient(120deg,#a23b72,#e4657d);
+  --g4:linear-gradient(120deg,#e4657d,#f5a45d); --gh:linear-gradient(120deg,#ff7a45 0%,#f7a23a 55%,#f6c453 100%);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#1c1511; --card:#261c16; --ink:#f6eadf; --muted:#c3ab97; --line:#41302a;
+  --brand:#ff8a55; --brand-ink:#2a1306; --brand-soft:#3b2518; --good:#59d29b; --good-soft:#153326;
+  --warn:#f5bb62; --warn-soft:#3a2b0e; --bad:#f08a80; --teal:#4cc9c6; --gold:#f5be4a; --plum:#e07db0;}
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:0 16px 64px}
+header.top{display:flex;align-items:center;gap:12px;padding:20px 0 8px}
+.logo{width:38px;height:38px;border-radius:10px;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-weight:700}
+header.top h1{font-size:18px;margin:0}
+header.top p{margin:0;color:var(--muted);font-size:13px}
+.stepper{display:flex;gap:8px;margin:12px 0 20px}
+.stepper div{flex:1;font-size:12px;color:var(--muted);border-top:3px solid var(--line);padding-top:6px}
+.stepper div.on{color:var(--brand);border-color:var(--brand);font-weight:600}
+.stepper div.done{border-color:var(--brand)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+.bubble{display:flex;gap:12px;align-items:flex-start;margin-bottom:18px}
+.avatar{flex:none;width:34px;height:34px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-weight:700;font-size:13px}
+.bubble .txt{background:var(--brand-soft);border-radius:4px 14px 14px 14px;padding:12px 16px}
+.bubble .txt .tag{font-size:12px;color:var(--brand);font-weight:600;margin-bottom:4px;letter-spacing:.02em}
+.bubble .txt p{margin:0}
+label{display:block;font-size:14px;font-weight:600;margin:16px 0 6px}
+select,input[type=text]{width:100%;padding:11px 12px;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px}
+select:focus,input:focus,button:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.hint{font-size:13px;color:var(--muted);margin-top:4px}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;cursor:pointer;display:flex;gap:12px;transition:border-color .15s,background .15s}
+.opt:hover{border-color:var(--brand);background:var(--brand-soft)}
+.opt .k{flex:none;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:600;color:var(--muted)}
+.opt.sel{border-color:var(--brand);background:var(--brand-soft)}
+.opt.sel .k{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.row{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:20px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:600;border-radius:10px;padding:11px 20px;border:1px solid var(--brand);background:var(--brand);color:var(--brand-ink);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--brand)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.prog-bar{height:4px;background:var(--line);border-radius:4px;margin-bottom:16px;overflow:hidden}
+.prog-bar i{display:block;height:100%;background:var(--brand);transition:width .3s}
+/* sıcak tema + görseller */
+body{background:var(--bg) radial-gradient(circle at 100% 0,rgba(247,162,58,.18),transparent 45%) no-repeat}
+.logo{background:var(--gh);color:#fff;box-shadow:0 4px 12px rgba(217,72,15,.3)}
+.card{box-shadow:0 6px 24px rgba(160,90,40,.08)}
+.hero-banner{margin:-22px -22px 20px;border-radius:14px 14px 0 0;background:var(--gh);overflow:hidden}
+.hero-banner svg{display:block;width:100%;height:auto}
+.banner{margin:-22px -22px 18px;border-radius:14px 14px 0 0;overflow:hidden;height:96px}
+.banner svg{display:block;width:100%;height:100%}
+.b5{background:linear-gradient(120deg,#0e8a8c,#a23b72)}
+.b6{background:linear-gradient(120deg,#f2a516,#d9480f)}
+.sec.c7{--c:var(--gold)}
+.sec.c6{--c:var(--teal)}
+.disc{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.disc.top{border-color:var(--teal);background:var(--good-soft)}
+.disc .h{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-weight:600}
+.disc .parts{font-size:12.5px;color:var(--muted);margin:2px 0 6px}
+.disc p{margin:4px 0 0;font-size:13.5px}
+.b0{background:var(--g0)}.b1{background:var(--g1)}.b2{background:var(--g2)}.b3{background:var(--g3)}.b4{background:var(--g4)}
+.prog-bar{background:var(--line)} .prog-bar i{background:var(--gh)}
+.avatar{background:var(--gh);color:#fff}
+.bubble .txt{border:1px solid var(--line)}
+.opt .k{background:var(--brand-soft);color:var(--brand);border-color:transparent}
+.opt:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(160,90,40,.12)}
+.btn{background:var(--gh);border:0;color:#fff;box-shadow:0 3px 10px rgba(217,72,15,.25)}
+.btn.ghost{background:transparent;border:1px solid var(--brand);color:var(--brand);box-shadow:none}
+.stepper div{border-top-width:4px;border-radius:4px}
+.stepper div.on,.stepper div.done{border-color:var(--gold)}
+.sec{border-top:4px solid var(--c,var(--brand))}
+.sec.c1{--c:var(--brand)} .sec.c2{--c:var(--teal)} .sec.c3{--c:var(--gold)} .sec.c4{--c:var(--plum)} .sec.c5{--c:var(--good)}
+.sec h3{display:flex;align-items:center;gap:8px}
+.ico{flex:none;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--c,var(--brand));color:#fff}
+.ico svg{width:17px;height:17px}
+.sec.hero-sec{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--brand-soft),var(--card) 70%)}
+.sec.hero-sec .deco{position:absolute;right:-10px;bottom:-6px;width:230px;opacity:.95;pointer-events:none}
+.sec.hero-sec .hero>div:last-child{padding-right:130px}
+.chip.good{background:var(--good-soft)}
+.bar .t b{background:var(--g0)}
+.phase{background:linear-gradient(180deg,var(--brand-soft),transparent 60%)}
+.phase:nth-child(2){background:linear-gradient(180deg,#e0f4f2,transparent 60%)}
+.phase:nth-child(3){background:linear-gradient(180deg,#fff0cf,transparent 60%)}
+@media (prefers-color-scheme:dark){.phase:nth-child(2){background:linear-gradient(180deg,#12302f,transparent 60%)}.phase:nth-child(3){background:linear-gradient(180deg,#3a2b0e,transparent 60%)}}
+@media (max-width:640px){.sec.hero-sec .deco{display:none}.sec.hero-sec .hero>div:last-child{padding-right:0}}
+/* report */
+.rep h2{font-size:20px;margin:0 0 4px}
+.rep h3{font-size:16px;margin:0 0 10px}
+.meta{color:var(--muted);font-size:13px;margin-bottom:18px}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;break-inside:avoid}
+.hero{display:grid;grid-template-columns:170px 1fr;gap:22px;align-items:center}
+.hero .big{font-size:13px;color:var(--muted)}
+.chip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--brand-soft);color:var(--brand);margin:0 6px 6px 0}
+.chip.good{background:var(--good-soft);color:var(--good)} .chip.warn{background:var(--warn-soft);color:var(--warn)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.bar{margin:10px 0}
+.bar .l{display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px}
+.bar .t{height:9px;background:var(--line);border-radius:9px;position:relative}
+.bar .t b{position:absolute;left:0;top:0;bottom:0;border-radius:9px;background:var(--brand)}
+.bar .t u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.7}
+.gap{border-left:3px solid var(--line);padding:2px 0 2px 12px;margin:12px 0}
+.gap.g{border-color:var(--good)} .gap.w{border-color:var(--warn)}
+.gap h4{margin:0;font-size:14px} .gap p{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.route{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px}
+.route.rec{border-color:var(--brand);background:var(--brand-soft)}
+.route h4{margin:0 0 2px;font-size:15px}
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+.phase{border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13.5px}
+.phase h5{margin:0 0 6px;font-size:13px;color:var(--brand)}
+.phase ul{margin:0;padding-left:18px} .phase li{margin-bottom:4px}
+.note{font-size:12.5px;color:var(--muted);margin-top:14px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 18px}
+@media (max-width:640px){
+  .hero,.two,.phases{grid-template-columns:1fr}
+  .wrap{padding:0 12px 48px}
+  .card{padding:16px}
+  .hero-banner,.banner{margin:-16px -16px 14px}
+  .banner{height:80px}
+  header.top{padding:14px 0 4px}
+  header.top h1{font-size:16px} header.top p{font-size:12px}
+  .stepper{gap:6px;margin:8px 0 14px} .stepper div{font-size:11px}
+  .bubble{gap:8px;margin-bottom:14px}
+  .avatar{width:30px;height:30px;font-size:12px}
+  .bubble .txt{padding:10px 12px}
+  .bubble .txt p{font-size:15px}
+  .opt{padding:11px 12px;gap:10px;font-size:15px}
+  .row{flex-wrap:nowrap}
+  .row .btn{flex:1;padding:12px 10px}
+  .sec{padding:16px}
+  .rep h2{font-size:18px}
+  .hero{justify-items:center;text-align:center}
+  .hero>div:last-child{text-align:left}
+  .disc .h{flex-direction:column;align-items:flex-start}
+  .actions .btn{flex:1 1 100%}
+}
+@media print{
+  @page{margin:14mm}
+  :root{--bg:#fff;--card:#fff;--ink:#111;--muted:#444;--line:#ecd9c6;--brand:#d9480f;--brand-soft:#ffeee0;--good:#1b7a52;--good-soft:#e3f4ec;--warn:#b45309;--warn-soft:#fff0cf;--teal:#0e8a8c;--gold:#f2a516;--plum:#a23b72}
+  body{background:#fff!important}.hero-banner,.banner{display:none}.sec.hero-sec .deco{width:170px}
+  body{background:#fff;font-size:12.5px}
+  .no-print,header.top p,.stepper{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .sec{break-inside:avoid;box-shadow:none}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">K</div>
+    <div><h1>Kariyer Öz Değerlendirme Asistanı</h1><p>Diagnostik &amp; medikal teknoloji saha, aplikasyon ve atölye ekipleri için</p></div>
+  </header>
+  <div class="stepper no-print" id="stepper">
+    <div id="s1">1 · Tanışma</div><div id="s2">2 · Değerlendirme</div><div id="s3">3 · Rapor</div>
+  </div>
+  <main id="app"></main>
+</div>
+
+<script>
+/* ============ VERİ ============ */
+const TITLES = [
+  {v:"Saha Servis Mühendisi", f:"field", s:0},
+  {v:"Kıdemli Saha Servis Mühendisi", f:"field", s:1},
+  {v:"Aplikasyon Uzmanı", f:"app", s:0},
+  {v:"Kıdemli Aplikasyon Uzmanı", f:"app", s:1},
+  {v:"Atölye Destek Teknisyeni / Uzmanı", f:"work", s:0},
+  {v:"Kıdemli Atölye Destek Uzmanı", f:"work", s:1}
+];
+/* Hedef yalnızca bir üst basamak veya yatay geçiş olabilir; mevcut rolün kendisi/altı ve kendi alanına yatay geçiş çıkmaz */
+const eligible=(t,title)=>{
+  if(t.id==="senior") return title.s===0;
+  if(t.id==="toapp") return title.f!=="app";
+  if(t.id==="tofield") return title.f!=="field";
+  return true;
+};
+const YEARS = [
+  {v:"1 yıldan az", n:0.5},{v:"1–3 yıl", n:2},{v:"3–5 yıl", n:4},{v:"5–10 yıl", n:7.5},{v:"10 yıldan fazla", n:12}
+];
+/* req: dreyfus, tech, human, conc | type: vertical | expert | lateral */
+const TARGETS = [
+  {id:"senior", n:"Kıdemli Uzman / Teknik Referans (SME)", type:"expert", req:[4,85,65,55]},
+  {id:"lead", n:"Takım Lideri / Teknik Lider", type:"vertical", req:[4,75,75,65]},
+  {id:"mgr", n:"Manager (Servis / Destek Müdürü)", type:"vertical", req:[4,65,80,85]},
+  {id:"trainer", n:"Teknik Eğitmen / Trainer", type:"lateral", req:[4,75,85,55]},
+  {id:"prod", n:"Ürün / Çözüm Uzmanı (Product Specialist)", type:"lateral", req:[4,75,75,70]},
+  {id:"toapp", n:"Aplikasyon Uzmanı (yatay geçiş)", type:"lateral", req:[3,70,75,50]},
+  {id:"tofield", n:"Saha Servis Mühendisi (yatay geçiş)", type:"lateral", req:[3,75,65,45]}
+];
+const ANCHORS = {
+  TF:"Teknik / Fonksiyonel Yetkinlik", GM:"Genel Yönetim", AU:"Özerklik / Bağımsızlık", SE:"Güvenlik / İstikrar",
+  EC:"Girişimci Yaratıcılık", SV:"Hizmet / Adanmışlık", CH:"Saf Meydan Okuma", LS:"Yaşam Tarzı Dengesi"
+};
+const DREYFUS = ["", "Acemi (Novice)", "İleri Başlangıç (Advanced Beginner)", "Yetkin (Competent)", "Usta / Profesyonel (Proficient)", "Uzman (Expert)"];
+
+/* seçenek: text, d (Dreyfus 1-5), t/h/c (Katz 0-4), a (Schein çıpa ağırlıkları) */
+const O = (text,d,t,h,c,a)=>({text,d,t,h,c,a:a||{}});
+
+const QUESTIONS = [
+ { tag:"Teknik Uzmanlık · Dreyfus",
+   scenario(ctx){
+     return {
+       field:"Gece vardiyasında hastanedeki kritik bir analizör hata veriyor ve laboratuvarda numuneler birikiyor. Hata kodu karşınıza ilk kez çıkıyor ve servis kılavuzu net bir yol göstermiyor. Ne yaparsınız?",
+       app:"Yeni kurulan bir testin kalite kontrol sonuçları laboratuvarda tutarsız çıkıyor, müşteri ise hasta sonuçlarını bir an önce vermek istiyor. Nasıl ilerlersiniz?",
+       work:"Atölyeye gelen bir modülün arızası test düzeneğinde tekrarlanamıyor (aralıklı arıza), saha ise acil değişim bekliyor. Ne yaparsınız?"
+     }[ctx.family==="lead"?"field":ctx.family];
+   },
+   options(ctx){
+     const T={
+      field:["Kılavuzdaki adımları sırayla uygular, çözülmezse hemen Global 2. level destek ekibine eskale ederim.",
+             "Belirtileri ve son değişiklikleri (bakım, kalibrasyon, reaktif lotu) analiz ederek kök neden hipotezi kurar, test eder; gerekirse Global 2. level destek ekibini paralelde bilgilendirir ve loglarla desteklerim.",
+             "Önce laboratuvarı geçici çözümle çalışır hale getirir, sonra kök neden analizi yapar ve benzer arızalar için bir bilgi notu yazarım.",
+             "Müdahale etmeden önce yöneticimden onay alır, onay gelmeden işlem yapmam."],
+      app:["Üretici prosedürünü adım adım uygular, sonuç değişmezse Global 2. level destek ekibine eskale ederim.",
+           "Kalibratör, reaktif, kontrol lotu ve cihaz parametrelerini sistematik karşılaştırır, değişkenleri tek tek izole ederek sebebi daraltırım.",
+           "Sonuçların kullanımını riskine göre durdurur/sınırlar, kök nedeni bulur ve laboratuvar için doğrulama planı ile kalıcı bir kontrol önerisi hazırlarım.",
+           "Karar sorumluluğunu almadan önce yöneticimden onay alırım."],
+      work:["Servis prosedürüne göre standart testleri yapar, bulgu çıkmazsa modülü 'arıza bulunamadı' diye iade ederim.",
+            "Arıza geçmişi, çalışma koşulları ve bileşenleri analiz eder, stres/uzatılmış testlerle arızayı tetiklemeye çalışırım.",
+            "Sahaya yedeği hızla çıkarır, arızalı modülü kök neden için incelemeye devam eder ve bulguları tüm atölye için dokümante ederim.",
+            "Kararı ekip lideri vermeden ilerlemem, onay beklerim."]
+     }[ctx.family==="lead"?"field":ctx.family];
+     return [
+       O(T[0],2,1,1,0,{SE:2}),
+       O(T[1],4,3,2,2,{TF:2}),
+       O(T[2],5,4,3,3,{TF:1,SV:1,GM:1}),
+       O(T[3],1,0,1,0,{SE:2})
+     ];
+   }},
+ { tag:"Beşeri Beceriler · Katz",
+   scenario(ctx){
+     return ctx.q1.d>=4
+      ? "Çözümü bulduktan sonra, daha deneyimsiz bir meslektaşınızın aynı konuda müşteriye yanlış bilgi verdiğini öğreniyorsunuz. Nasıl yaklaşırsınız?"
+      : "Laboratuvar şefi çözüm süresinin uzamasından dolayı sinirli ve sizi sorumlu tutuyor. Nasıl iletişim kurarsınız?";
+   },
+   options(ctx){
+     return ctx.q1.d>=4 ? [
+       O("Müşteriye düzeltmeyi hızla yapar, ardından meslektaşımla suçlamadan, birebir oturup nedenini birlikte analiz ederim.",4,2,4,2,{SV:1,GM:1}),
+       O("Düzeltmeyi kendim yapar, meslektaşıma kısa bir e-postayla doğru bilgiyi iletirim.",3,2,2,1,{AU:1,TF:1}),
+       O("Durumu yöneticime bildirir ve onun müdahalesini beklerim.",2,1,1,0,{SE:2}),
+       O("Bilgi paylaşımı için ekibe bir vaka çalışması ve kısa eğitim hazırlar, ayrıca meslektaşıma düzenli koçluk yaparım.",5,3,4,4,{GM:2,SV:1})
+     ] : [
+       O("Sakin kalır, durumu ve çözüm planını net zaman çizelgesiyle anlatır, düzenli ara bilgilendirme yaparım.",4,2,4,2,{SV:1}),
+       O("Sorunun benden kaynaklanmadığı anlaşılsın diye teknik detayları ayrıntılı biçimde açıklarım.",2,2,1,0,{TF:1}),
+       O("Konuyu hemen yöneticime devrederim.",1,0,1,0,{SE:2}),
+       O("Empati kurar, geçici çözüm ve telafi seçeneklerini (yedek cihaz, ek eğitim) birlikte belirler, süreci yazılı kayıt altına alırım.",4,2,4,3,{SV:1,GM:1})
+     ];
+   }},
+ { tag:"Kavramsal / Stratejik Beceriler · Katz",
+   scenario(ctx){
+     return ctx.vertical
+      ? "Bölgenizde tekrarlayan arıza/çağrı sayısı son 6 ayda %20 arttı; ekip ve yedek parça kapasitesi sınırlı. Yönetim sizden bir iyileştirme önerisi bekliyor."
+      : "Şirket yeni bir cihaz/test platformunu pazara sunuyor. Ürün ekibi sahadaki ve laboratuvarlardaki gerçek ihtiyaçları öğrenmek için sizden destek istiyor.";
+   },
+   options(ctx){
+     return ctx.vertical ? [
+       O("Verileri toplar, Pareto analiziyle en sık 3 nedeni belirler; öncelikli aksiyon planı ve beklenen etkiyi (ör. ilk seferde çözüm oranı) sunarım.",4,3,2,4,{GM:2,TF:1}),
+       O("Daha fazla personel ve yedek parça bütçesi talep ederim.",2,0,1,1,{SE:1}),
+       O("Ekibin görüşlerini alıp ortak bir yol haritası çıkarır; kalite ve ürün ekipleriyle kalıcı bir geri bildirim kanalı kurulmasını öneririm.",4,2,4,4,{GM:2,SV:1}),
+       O("Öneri geliştirmek benim görevim değil; teknik işimi iyi yapmaya odaklanırım.",3,2,0,0,{TF:1,AU:1})
+     ] : [
+       O("Saha deneyimimden tipik sorunları ve müşteri beklentilerini yapılandırılmış bir geri bildirim raporuna dönüştürür, pilot müşterilerde doğrulamayı öneririm.",4,3,3,4,{EC:1,CH:1,TF:1}),
+       O("Gerekirse katılırım ama asıl işimden ödün vermemek şartıyla.",3,1,1,1,{SE:1,LS:1}),
+       O("Gönüllü olurum; yeni ürünü hızla öğrenip ilk eğitimleri vermeyi teklif ederim.",4,3,4,3,{SV:1,CH:1,EC:1}),
+       O("Ürün ekibi bu konuda yetkin; benim katkıma gerek olduğunu düşünmüyorum.",2,0,0,0,{SE:1})
+     ];
+   }},
+ { tag:"Kariyer Çıpaları · Schein",
+   scenario(){ return "Aşağıdaki tekliflerden hangisi sizi gerçekten en çok motive eder? (Maaş ve unvan hepsinde eşit varsayın.)"; },
+   options(){ return [
+     O("Bir ekibi yönetmek; bütçe, hedef ve insan sorumluluğu almak.",0,0,0,0,{GM:3}),
+     O("Bir platformun/teknolojinin şirket içindeki en yetkin referans uzmanı olmak.",0,0,0,0,{TF:3}),
+     O("Kendi önceliklerimi belirlediğim, bağımsız ve esnek çalışabildiğim bir rol.",0,0,0,0,{AU:3}),
+     O("Öngörülebilir, istikrarlı ve iş güvencesi yüksek bir pozisyon.",0,0,0,0,{SE:3}),
+     O("Laboratuvarlara ve hastalara dolaylı yoldan fark yaratmak; başkalarına öğretmek, onları geliştirmek.",0,0,0,0,{SV:3}),
+     O("Şirketin en zor, daha önce çözülmemiş problemlerini çözmek.",0,0,0,0,{CH:3})
+   ];}},
+ { id:"tradeoff", scene:6, tag:"Motivasyon · Ödünleşim",
+   scenario(){ return "Kariyerinizde aynı anda iki şeyi elde edemeyeceğiniz bir noktadasınız. Aşağıdaki tekliflerden hangisini seçerdiniz?"; },
+   options(){ return [
+     {...O("Maaşta %15 artış sağlayan, ama yeni bir şey öğrenmeyeceğiniz rutin bir rol.",0,0,0,0,{}), m:"ext", x:"pay"},
+     {...O("Maaş aynı kalır, ama şirketin en yeni ve en zor platformunda çalışırsınız.",0,0,0,0,{}), m:"growth"},
+     {...O("Daha üst bir unvan verilir, ancak teknik işten uzaklaşırsınız ve maaş artışı çok küçük kalır.",0,0,0,0,{}), m:"ext", x:"title"},
+     {...O("Maaş ve unvan aynı kalır, ama esnek çalışma düzeni elde eder, seyahatiniz azalır.",0,0,0,0,{}), m:"auto"},
+     {...O("Mevcut durumunuzu korur; güvenli bir kadro ve öngörülebilir bir görev tanımıyla devam edersiniz.",0,0,0,0,{}), m:"sec"}
+   ];}},
+ { id:"values", type:"rank", scene:6, tag:"Motivasyon · Değer Sıralaması",
+   scenario(){ return "Bir sonraki kariyer adımınızı seçerken sizin için en belirleyici üç değeri, en önemlisinden başlayarak sıralayın. (Yalnızca üç tane seçin.)"; },
+   values:[
+     {v:"pay",text:"Maaş ve maddi kazanç",m:"ext"},{v:"title",text:"Unvan ve statü",m:"ext"},
+     {v:"learn",text:"Öğrenme ve uzmanlaşma",m:"growth"},{v:"impact",text:"Anlamlı iş, laboratuvara ve hastaya etki",m:"growth"},
+     {v:"auto",text:"Özerklik, kendi kararlarımı verebilmek",m:"auto"},{v:"balance",text:"İş-yaşam dengesi",m:"auto"},
+     {v:"secure",text:"İş güvencesi ve öngörülebilirlik",m:"sec"},{v:"people",text:"İyi bir ekip ve ilişkiler",m:"sec"}]},
+ { scene:4, tag:"Öğrenme ve Gelişim · Dreyfus",
+   scenario(){ return "Yeni nesil bir platform için 3 haftalık yoğun bir eğitim ve sertifikasyon programı öneriliyor; bu sürede işlerinizin bir kısmı devredilecek. Tepkiniz ne olur?"; },
+   options(){ return [
+     O("Hemen katılırım; öğrendiklerimi ekibe aktaracak bir mini eğitim planı hazırlarım.",4,3,4,3,{SV:1,GM:1}),
+     O("Katılırım, ancak derin teknik pratik ve cihaz başında uygulama ağırlıklı olmasını isterim.",4,4,1,1,{TF:2}),
+     O("Yalnızca iş-yaşam dengemi bozmayan bir takvimle katılırım.",2,1,1,0,{LS:2}),
+     O("Katılır ve edindiğim bilgiyi şirket içinde yeni bir hizmet/iş modeline dönüştürmeyi önerebilirim.",4,3,2,4,{EC:2,CH:1})
+   ];}}
+];
+
+/* ============ GÖRSELLER (satır içi SVG) ============ */
+const HERO_SVG = `<svg viewBox="0 0 760 190" role="img" aria-label="Analizör, mühendis ve yükselen basamaklar illüstrasyonu" preserveAspectRatio="xMidYMid slice">
+  <circle cx="90" cy="30" r="90" fill="#fff" opacity=".10"/><circle cx="420" cy="190" r="110" fill="#fff" opacity=".10"/><circle cx="730" cy="20" r="70" fill="#fff" opacity=".12"/>
+  <text x="36" y="84" font-size="31" font-weight="700" fill="#fff" font-family="system-ui,Segoe UI,sans-serif">Kariyerinizi birlikte</text>
+  <text x="36" y="122" font-size="31" font-weight="700" fill="#fff" font-family="system-ui,Segoe UI,sans-serif">planlayalım</text>
+  <text x="36" y="152" font-size="14" fill="#fff" opacity=".92" font-family="system-ui,Segoe UI,sans-serif">Saha · Aplikasyon · Atölye</text>
+  <!-- analizör -->
+  <rect x="340" y="62" width="130" height="96" rx="14" fill="#fff"/>
+  <rect x="354" y="76" width="74" height="42" rx="7" fill="#ff7a45" opacity=".25"/>
+  <polyline points="360,108 376,94 390,102 406,84 422,90" fill="none" stroke="#d9480f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="448" cy="86" r="6" fill="#1b9e6a"/><circle cx="448" cy="104" r="6" fill="#f2a516"/>
+  <rect x="356" y="128" width="9" height="22" rx="3" fill="#e4657d"/><rect x="372" y="128" width="9" height="22" rx="3" fill="#14a3a0"/><rect x="388" y="128" width="9" height="22" rx="3" fill="#f2a516"/><rect x="404" y="128" width="9" height="22" rx="3" fill="#e4657d"/><rect x="420" y="128" width="9" height="22" rx="3" fill="#14a3a0"/>
+  <!-- çark -->
+  <circle cx="318" cy="52" r="22" fill="none" stroke="#fff" stroke-width="10" stroke-dasharray="7 7.2" opacity=".9"/><circle cx="318" cy="52" r="14" fill="#fff"/><circle cx="318" cy="52" r="5" fill="#f7a23a"/>
+  <!-- mühendis -->
+  <path d="M500 160c0-26 14-42 34-42s34 16 34 42z" fill="#fff"/>
+  <circle cx="534" cy="96" r="19" fill="#ffd9bf"/>
+  <path d="M514 92a20 20 0 0 1 40 0z" fill="#14a3a0"/><rect x="510" y="90" width="48" height="6" rx="3" fill="#0e8a8c"/>
+  <rect x="520" y="130" width="28" height="7" rx="3.5" fill="#ff7a45"/>
+  <!-- anahtar -->
+  <g transform="rotate(35 590 60)"><rect x="586" y="26" width="9" height="62" rx="4.5" fill="#fff"/><circle cx="590.5" cy="26" r="13" fill="#fff"/><rect x="585" y="12" width="11" height="15" fill="#f7a23a"/></g>
+  <!-- basamaklar ve bayrak -->
+  <polygon points="620,160 620,140 650,140 650,160" fill="#fff" opacity=".7"/><polygon points="650,160 650,118 680,118 680,160" fill="#fff" opacity=".85"/><polygon points="680,160 680,92 712,92 712,160" fill="#fff"/>
+  <line x1="700" y1="92" x2="700" y2="52" stroke="#fff" stroke-width="3"/><polygon points="700,52 728,60 700,70" fill="#14a3a0"/>
+  <path d="M612 110 C 626 96, 640 88, 660 78" stroke="#fff" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round" fill="none"/>
+</svg>`;
+
+const SCENES = [
+ `<circle cx="70" cy="14" r="52" fill="#fff" opacity=".12"/><circle cx="260" cy="96" r="44" fill="#fff" opacity=".12"/>
+  <rect x="400" y="22" width="104" height="62" rx="10" fill="#fff"/><rect x="412" y="32" width="52" height="28" rx="5" fill="#ff7a45" opacity=".3"/>
+  <polyline points="418,54 430,44 440,50 452,38" fill="none" stroke="#d9480f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="484" cy="40" r="5" fill="#1b9e6a"/><circle cx="484" cy="56" r="5" fill="#f2a516"/>
+  <g transform="rotate(35 534 54)"><rect x="530" y="26" width="8" height="46" rx="4" fill="#fff"/><circle cx="534" cy="26" r="10" fill="#fff"/><rect x="529.5" y="14" width="9" height="12" fill="#f7a23a"/></g>
+  <polygon points="350,84 372,40 394,84" fill="#fff" opacity=".92"/><rect x="370" y="55" width="4" height="16" rx="2" fill="#d9480f"/><circle cx="372" cy="77" r="2.6" fill="#d9480f"/>`,
+ `<circle cx="80" cy="90" r="56" fill="#fff" opacity=".12"/><circle cx="250" cy="10" r="40" fill="#fff" opacity=".12"/>
+  <rect x="396" y="8" width="84" height="30" rx="14" fill="#fff"/><polygon points="420,38 430,38 424,48" fill="#fff"/>
+  <path d="M418 24l7 7 14-14" fill="none" stroke="#14a3a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="452" cy="24" r="6" fill="#e4657d"/>
+  <circle cx="420" cy="58" r="14" fill="#ffe0c9"/><path d="M394 96c0-20 11-30 26-30s26 10 26 30z" fill="#fff"/>
+  <circle cx="500" cy="58" r="14" fill="#ffd0b0"/><path d="M474 96c0-20 11-30 26-30s26 10 26 30z" fill="#ffe9c2"/>
+  <path d="M548 40c0-8 12-8 12 0 0 6-6 10-6 10s-6-4-6-10z" fill="#fff"/><path d="M568 28c0-6 9-6 9 0 0 5-4.5 7-4.5 7s-4.5-2-4.5-7z" fill="#fff" opacity=".8"/>`,
+ `<circle cx="60" cy="20" r="56" fill="#fff" opacity=".12"/><circle cx="280" cy="96" r="44" fill="#fff" opacity=".12"/>
+  <rect x="380" y="62" width="22" height="24" rx="4" fill="#fff" opacity=".7"/><rect x="410" y="48" width="22" height="38" rx="4" fill="#fff" opacity=".8"/><rect x="440" y="34" width="22" height="52" rx="4" fill="#fff" opacity=".9"/><rect x="470" y="18" width="22" height="68" rx="4" fill="#fff"/>
+  <polyline points="384,56 416,40 446,28 480,10" fill="none" stroke="#d9480f" stroke-width="3" stroke-linecap="round"/><polygon points="486,6 470,8 482,20" fill="#d9480f"/>
+  <circle cx="548" cy="34" r="17" fill="#fff"/><rect x="540" y="50" width="16" height="9" rx="3" fill="#fff"/><rect x="543" y="61" width="10" height="5" rx="2.5" fill="#fff"/>
+  <path d="M542 36l6 6 6-6" fill="none" stroke="#f2a516" stroke-width="3" stroke-linecap="round"/>
+  <path d="M548 6v-4M526 14l-3-3M570 14l3-3M520 34h-5M576 34h5" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`,
+ `<circle cx="70" cy="90" r="54" fill="#fff" opacity=".12"/><circle cx="270" cy="8" r="42" fill="#fff" opacity=".12"/>
+  <circle cx="480" cy="48" r="36" fill="#fff" fill-opacity=".18" stroke="#fff" stroke-width="5"/>
+  <polygon points="480,20 490,48 480,52 470,48" fill="#fff"/><polygon points="480,76 490,48 480,44 470,48" fill="#fff" opacity=".55"/><circle cx="480" cy="48" r="4" fill="#a23b72"/>
+  <path d="M480 10v6M480 80v6M442 48h6M512 48h6" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <rect x="374" y="30" width="46" height="14" rx="3" fill="#fff"/><polygon points="420,30 432,37 420,44" fill="#fff"/><rect x="382" y="52" width="40" height="14" rx="3" fill="#fff" opacity=".7"/><polygon points="382,52 370,59 382,66" fill="#fff" opacity=".7"/><rect x="396" y="66" width="5" height="22" fill="#fff" opacity=".8"/>`,
+ `<circle cx="60" cy="22" r="54" fill="#fff" opacity=".12"/><circle cx="260" cy="96" r="46" fill="#fff" opacity=".12"/>
+  <path d="M390 30c20-8 40-4 52 6v42c-12-10-32-14-52-6z" fill="#fff"/><path d="M494 30c-20-8-40-4-52 6v42c12-10 32-14 52-6z" fill="#fff" opacity=".8"/>
+  <path d="M400 40c12-3 24-1 34 4M400 50c12-3 24-1 34 4M450 44c10-5 22-7 34-4M450 54c10-5 22-7 34-4" stroke="#e4657d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <polygon points="540,20 568,30 540,40 512,30" fill="#fff"/><path d="M526 38v10c8 6 20 6 28 0V38" fill="#fff" opacity=".85"/><line x1="568" y1="30" x2="568" y2="50" stroke="#fff" stroke-width="3"/><circle cx="568" cy="53" r="4" fill="#fff"/>
+  <polygon points="470,8 473,16 481,16 475,21 477,29 470,24 463,29 465,21 459,16 467,16" fill="#fff"/>`
+];
+const banner = (i,cls=i)=>`<div class="banner b${cls}"><svg viewBox="0 0 600 96" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">${SCENES[i]}</svg></div>`;
+const ICONS = {
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/>',
+  radar:'<polygon points="12,3 21,19 3,19"/><polygon points="12,9 16.5,17 7.5,17"/>',
+  gap:'<path d="M4 20V12M10 20V6M16 20V14M22 20V9"/>',
+  compass:'<circle cx="12" cy="12" r="9"/><polygon points="15.5,8.5 13.5,13.5 8.5,15.5 10.5,10.5"/>',
+  map:'<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/>'
+};
+const ico=(n)=>`<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg></span>`;
+const DECO_SVG = `<svg class="deco" viewBox="0 0 230 140" aria-hidden="true">
+  <circle cx="180" cy="34" r="20" fill="#f6c453"/>
+  <polygon points="0,140 70,40 120,100 150,60 230,140" fill="#f7a23a" opacity=".55"/>
+  <polygon points="40,140 120,22 200,140" fill="#ff7a45"/><polygon points="120,22 138,50 120,44 104,52" fill="#fff" opacity=".85"/>
+  <line x1="120" y1="22" x2="120" y2="2" stroke="#2b2018" stroke-width="2.5"/><polygon points="120,2 146,9 120,17" fill="#14a3a0"/>
+</svg>`;
+
+/* ============ BÖLÜM 2 · DİSİPLİN KEŞFİ ============ */
+SCENES.push(`<circle cx="60" cy="20" r="54" fill="#fff" opacity=".12"/><circle cx="270" cy="96" r="46" fill="#fff" opacity=".12"/>
+  <g fill="#fff"><rect x="330" y="34" width="46" height="34" rx="6"/><path d="M344 34v-6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6" fill="none" stroke="#fff" stroke-width="4"/><rect x="330" y="48" width="46" height="4" fill="#d9480f" opacity=".35"/>
+  <path d="M398 56l26-20v40z" opacity=".95"/><rect x="386" y="48" width="14" height="16" rx="3"/><circle cx="430" cy="34" r="5" opacity=".7"/>
+  <rect x="456" y="44" width="40" height="26" rx="3" opacity=".9"/><path d="M456 44l20-14 20 14" opacity=".7"/><rect x="470" y="54" width="12" height="16" fill="#a23b72" opacity=".4"/>
+  <path d="M520 28l24 8v16c0 14-10 22-24 26-14-4-24-12-24-26V36z" transform="translate(32 -4) scale(.9)" opacity=".95"/></g>
+  <path d="M547 42l7 7 12-14" fill="none" stroke="#0e8a8c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`);
+ICONS.brief='<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>';
+ICONS.coin='<circle cx="12" cy="12" r="9"/><path d="M12 6.5v11M9 9.5c.6-1.6 5.4-1.6 6 0 .5 1.7-6 1.6-6 3.4 0 1.7 5.4 1.7 6 0"/>';
+// sahne 6: terazi, madeni para ve kupa (motivasyon soruları)
+SCENES.push(`<circle cx="70" cy="90" r="54" fill="#fff" opacity=".12"/><circle cx="270" cy="8" r="42" fill="#fff" opacity=".12"/>
+  <line x1="470" y1="20" x2="470" y2="84" stroke="#fff" stroke-width="5"/><rect x="448" y="82" width="44" height="6" rx="3" fill="#fff"/>
+  <line x1="420" y1="30" x2="520" y2="30" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <path d="M420 30l-18 30h36z" fill="#fff" opacity=".85"/><path d="M520 30l-18 30h36z" fill="#fff" opacity=".85"/>
+  <circle cx="402" cy="48" r="9" fill="#f6c453"/><circle cx="502" cy="46" r="8" fill="#f6c453"/>
+  <path d="M556 24h28v14c0 10-6 16-14 16s-14-6-14-16z" fill="#fff"/><rect x="566" y="54" width="8" height="12" fill="#fff"/><rect x="560" y="66" width="20" height="5" rx="2" fill="#fff"/>
+  <path d="M556 28h-8c0 10 4 14 10 14M584 28h8c0 10-4 14-10 14" fill="none" stroke="#fff" stroke-width="3"/>
+  <path d="M570 30l3 6 6 1-4.5 4 1.2 6-5.7-3.2-5.7 3.2 1.2-6-4.5-4 6-1z" fill="#f2a516"/>`);
+
+const DISC_KEYS=["sales","mkt","sc","qa"];
+const DISC={
+ sales:{n:"Satış / Hesap Yönetimi", day:"Bir müşteriyle uzun vadeli bir anlaşmanın şartlarını görüşmek, ihtiyacını anlayıp ikna etmek ve hedefe ulaşmak.",
+   typical:"Müşteri toplantıları, teklif ve sözleşme görüşmeleri, hedef ve pipeline takibi, rakip konumlandırma.",
+   bridge:"Teknik Satış Destek / Pre-Sales Uygulama Uzmanı → Hesap Yöneticisi",
+   first:"Yaklaşan bir müşteri görüşmesine satış ekibiyle birlikte katılın ve müşterinin ticari önceliklerini not edin.",
+   profile:p=>p.human},
+ mkt:{n:"Pazarlama / Ürün Yönetimi", day:"Sahadan gelen ihtiyaçları analiz edip yeni bir ürün veya hizmet için mesaj ve lansman planı hazırlamak.",
+   typical:"Müşteri içgörüsü, pazar ve rakip analizi, lansman mesajları, saha ile ürün ekibi arasında köprü kurma.",
+   bridge:"Ürün / Çözüm Uzmanı → Ürün Yöneticisi (Pazarlama)",
+   first:"Sahadaki en sık duyduğunuz 3 müşteri ihtiyacını kanıtlarla tek sayfada özetleyip ürün ekibine sunun.",
+   profile:p=>(p.human+p.conc)/2},
+ sc:{n:"Tedarik Zinciri / Lojistik", day:"Stok, sevkiyat ve yedek parça akışını verilerle planlayıp darboğazları çözmek.",
+   typical:"Talep ve stok planlama, tedarikçi yönetimi, sevkiyat önceliklendirme, KPI ve veri analizi.",
+   bridge:"Yedek Parça / Servis Lojistik Koordinatörü → Tedarik Zinciri Uzmanı",
+   first:"Bölgenizdeki yedek parça bekleme sürelerini derleyip en sık geciken 5 kalemi analiz edin.",
+   profile:p=>p.conc*0.6+p.tech*0.4},
+ qa:{n:"Kalite / Regülasyon (QA/RA)", day:"Bir süreci standartlara göre denetleyip uygunsuzlukları kök nedenleriyle kapatmak ve dokümante etmek.",
+   typical:"Uygunsuzluk ve CAPA yönetimi, iç denetim, dokümantasyon, standart ve mevzuat takibi (ör. ISO 13485, IVDR).",
+   bridge:"Servis Kalite Uzmanı (Field Quality) → QA/RA Uzmanı",
+   first:"Son 6 aydaki tekrarlayan uygunsuzluk veya şikâyet kayıtlarını inceleyip bir kök neden özeti hazırlayın.",
+   profile:p=>p.tech}
+};
+const SKILLS=[
+ {t:"Müşteriyle güven ilişkisi kurma, zor müşteri yönetimi", w:{sales:2,mkt:1}},
+ {t:"Müşteri eğitimi veriyor veya sunum yapıyorum", w:{sales:1,mkt:2}},
+ {t:"Sahadan ürün geri bildirimi toplayıp raporluyorum", w:{mkt:2,qa:1}},
+ {t:"Yedek parça, stok veya lojistik takibi yapıyorum", w:{sc:2}},
+ {t:"Arıza kaydı, servis raporu ve dokümantasyon hazırlıyorum", w:{qa:2}},
+ {t:"Prosedür, ISO veya izlenebilirlik uygulamalarında çalışıyorum", w:{qa:2,sc:1}},
+ {t:"Veri analizi yapıyorum (KPI, arıza trendi)", w:{sc:1,mkt:1,qa:1}},
+ {t:"Teklif, sözleşme veya ticari konulara dahil oluyorum", w:{sales:2}},
+ {t:"Birden fazla bölge veya ekip arasında koordinasyon ve önceliklendirme yapıyorum", w:{sc:2,sales:1}},
+ {t:"Rakip ve pazar gelişmelerini takip ediyorum", w:{mkt:2,sales:1}}
+];
+const DSTEPS=[
+ {type:"single", id:"most", tag:"Disiplin Keşfi · İlgi",
+  text:"Şimdi farklı disiplinlere ilginizi ölçelim. Bir iş gününü seçebilseydiniz, hangisi sizi en çok enerjilendirirdi?",
+  options:()=>DISC_KEYS.map(k=>({v:k,text:DISC[k].day}))},
+ {type:"single", id:"least", tag:"Disiplin Keşfi · İlgi",
+  text:"Peki aşağıdakilerden hangisini yapmak zorunda kalsanız en çok yorulur veya zorlanırdınız?",
+  options:()=>DISC_KEYS.filter(k=>k!==S.dAns.most).map(k=>({v:k,text:DISC[k].day}))},
+ {type:"pair", tag:"Disiplin Keşfi · Yatkınlık", text:"Aşağıdaki iki durumda nasıl davranırdınız?", items:[
+  {id:"sales", scenario:"Bir laboratuvar müşterisi, rakibin daha ucuz bir teklifini gösterip sözleşme yenilemesini sorguluyor. Bütçesi kısıtlı.",
+   options:[
+    {text:"Hemen indirim için yöneticime gider, fiyat konusunda yetkimin olmadığını söylerim.",score:1},
+    {text:"Toplam sahip olma maliyetini (arıza süresi, reaktif fire, personel zamanı) birlikte analiz eder, değeri rakamlarla gösteren esnek bir paket öneririm.",score:4},
+    {text:"Rakibin güvenilir olmadığını anlatıp müşteriyi vazgeçirmeye çalışırım.",score:0},
+    {text:"Rakibin teklifini inceler, farkları dürüstçe karşılaştırır ve müşterinin önceliğine göre bir çözüm sunarım.",score:3}]},
+  {id:"mkt", scenario:"Yeni bir test paneli için ürün ekibi lansman mesajı hazırlıyor ve sizden saha görüşü istiyor. Müşterilerin gerçek ihtiyacı ile ekibin vurgusu uyuşmuyor.",
+   options:[
+    {text:"Birkaç müşteriyle kısa bir doğrulama görüşmesi yapar, sonuçları ekibe sunarım.",score:3},
+    {text:"Mesaj üzerinde söz hakkım olmadığını düşünür, katkı vermem.",score:0},
+    {text:"Saha notlarını temalandırır, 3 temel ihtiyacı kanıtlarla sunar ve mesajın bu ihtiyaçlara göre yeniden kurgulanmasını öneririm.",score:4},
+    {text:"Kendi deneyimimi anlatır, kararı ürün ekibine bırakırım.",score:2}]}]},
+ {type:"pair", tag:"Disiplin Keşfi · Yatkınlık", text:"Bir durum daha, ikisi birlikte:", items:[
+  {id:"sc", scenario:"Kritik bir yedek parça tedarikçiden 3 hafta gecikecek; üç farklı bölgede saha ekipleri bu parçayı bekliyor.",
+   options:[
+    {text:"Her bölgeye eşit sayıda parça göndermeye çalışırım.",score:1},
+    {text:"Etkilenen cihazları ve müşteri kritikliğini listeler, mevcut stoğu önceliklendirir, alternatif tedarik ve geçici çözümleri çıkarır, tüm bölgelere net bir plan iletirim.",score:4},
+    {text:"Stoktaki parçaları bölgeler arasında kaydırır, kalanı bekleme listesine alırım.",score:3},
+    {text:"Süreç benim sorumluluğumda değil; bölge yöneticilerine bırakırım.",score:0}]},
+  {id:"qa", scenario:"Bir müşteri şikâyeti incelemesinde, yaptığınız servis kaydında eksik bir kalibrasyon girişi fark ediyorsunuz. İş fiilen doğru yapılmış.",
+   options:[
+    {text:"Kaydı düzeltir ve yöneticime bilgi veririm.",score:2},
+    {text:"İş doğru yapıldığı için kaydı sessizce tamamlarım.",score:1},
+    {text:"Şikâyet konusu değilse bir şey yapmam.",score:0},
+    {text:"Eksikliği raporlar, düzeltici/önleyici faaliyet (CAPA) kaydı açar, nedeni (form mu, eğitim mi) araştırır ve tekrarını önlerim.",score:4}]}]},
+ {type:"multi", id:"skills", tag:"Disiplin Keşfi · Aktarılabilir Beceriler",
+  text:"Son adım. Mevcut görevlerinizde hangilerini zaten yapıyorsunuz? (Birden fazla seçebilirsiniz, hiçbiri yoksa boş geçin.)",
+  options:()=>SKILLS.map((s,i)=>({v:i,text:s.t}))}
+];
+
+function computeDisc(prof){
+  const A=S.dAns;
+  const pick=S.discMode==="pick";
+  return DISC_KEYS.filter(k=>!pick||(S.discSel||[]).includes(k)).map(k=>{
+    const D=DISC[k];
+    // "pick" modunda ilgi, kullanıcının disiplini kendisinin seçmesinden (belirtilmiş ilgi) türetilir
+    let interest=50;
+    if(pick){
+      const n=(S.discSel||[]).length;
+      interest = n>=3 ? ([90,70,50,35][(A.pickInt||[]).indexOf(k)] ?? 50)
+               : n===2 ? (A.pickInt===k?90:65)
+               : ({hi:90,mid:75,low:55,unsure:40}[A.pickInt]||50);
+      // doğrulama sorusu: göreli sıralamanın mutlak ilgiyi şişirmesini önler (sıra korunur)
+      if(n>=2) interest *= ({hi:1,mid:.9,low:.75}[A.pickAbs]||1);
+    } else { if(A.most===k) interest+=45; if(A.least===k && A.least!==A.most) interest-=45; }
+    const item=DSTEPS.flatMap(s=>s.items||[]).find(x=>x.id===k);
+    const apt=item.options[A[k]].score/4*100;
+    const tr=Math.min(100,(A.skills||[]).reduce((a,i)=>a+(SKILLS[i].w[k]||0),0)/6*100);
+    const pr=Math.max(0,Math.min(100,D.profile(prof)));
+    const score=Math.round(.3*interest+.3*apt+.25*tr+.15*pr);
+    return {k,D,score,parts:{interest:Math.round(interest),apt:Math.round(apt),tr:Math.round(tr),pr:Math.round(pr)}};
+  }).sort((a,b)=>b.score-a.score);
+}
+
+/* ============ DURUM ============ */
+const S = { screen:"intro", name:"", titleIdx:"", yearsIdx:"", targetId:"", answers:[], pick:null, dAns:{} };
+const TOTAL_STEPS = QUESTIONS.length + DSTEPS.length;
+const app = document.getElementById("app");
+const $ = (h)=>{const t=document.createElement("template");t.innerHTML=h.trim();return t.content.firstChild};
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function ctxFor(qi){
+  const family = TITLES[S.titleIdx].f;
+  const t = TARGETS.find(x=>x.id===S.targetId);
+  const c = { family, vertical: !!t && t.type==="vertical" };
+  if(qi>=1) c.q1 = QUESTIONS[0].options(c)[S.answers[0].i];
+  return c;
+}
+
+function setStep(n){
+  ["s1","s2","s3"].forEach((id,i)=>{
+    document.getElementById(id).className = i+1===n?"on":(i+1<n?"done":"");
+  });
+}
+
+/* ============ EKRANLAR ============ */
+function renderIntro(){
+  setStep(1);
+  app.innerHTML="";
+  const node=$(`
+  <div class="card">
+    <div class="hero-banner">${HERO_SVG}</div>
+    <div class="bubble"><div class="avatar">M</div><div class="txt">
+      <div class="tag">ADIM 1 · TANIŞMA</div>
+      <p>Merhaba, hoş geldiniz. Ben diagnostik ve medikal teknoloji sektörüne odaklanan yapay zekâ destekli kariyer mentorunuzum. Önce üç kısa bilgiye ihtiyacım var. Ardından 7 durumsal soru soracağım. İsterseniz ikinci (isteğe bağlı) bölümde satış, pazarlama, tedarik zinciri ve kalite gibi farklı disiplinlere uygunluğunuza da bakabiliriz. Sonunda size kişisel bir kariyer raporu hazırlayacağım.</p>
+    </div></div>
+
+    <label for="name">Adınız (isteğe bağlı, rapor üstünde görünür)</label>
+    <input id="name" type="text" placeholder="Ad Soyad" autocomplete="off">
+
+    <label for="title">1. Mevcut unvanınız nedir?</label>
+    <select id="title"><option value="">Seçiniz…</option>${TITLES.map((t,i)=>`<option value="${i}">${esc(t.v)}</option>`).join("")}</select>
+
+    <label for="years">2. Kaç yıldır bu roldesiniz?</label>
+    <select id="years"><option value="">Seçiniz…</option>${YEARS.map((y,i)=>`<option value="${i}">${y.v}</option>`).join("")}</select>
+
+    <label for="target">3. Hedeflediğiniz bir sonraki pozisyon nedir?</label>
+    <select id="target"></select>
+    <div class="hint">Emin değilseniz son seçeneği işaretleyin; profilinize en uygun hedefi raporda ben belirleyeceğim.</div>
+
+    <div class="row"><span></span><button class="btn" id="go" disabled>Değerlendirmeye başla →</button></div>
+  </div>`);
+  app.appendChild(node);
+  const nName=node.querySelector("#name"), nTitle=node.querySelector("#title"), nYears=node.querySelector("#years"), nTarget=node.querySelector("#target"), $go=node.querySelector("#go");
+  const chk=()=>{ $go.disabled = !(nTitle.value!=="" && nYears.value!=="" && nTarget.value!==""); };
+  // hedef listesi, seçilen mevcut role göre süzülür
+  const fillTargets=(keep)=>{
+    const ti = nTitle.value===""?null:TITLES[nTitle.value];
+    const list = ti ? TARGETS.filter(t=>eligible(t,ti)) : [];
+    nTarget.innerHTML = `<option value="">${ti?"Seçiniz…":"Önce mevcut unvanınızı seçin"}</option>`
+      + list.map(t=>`<option value="${t.id}">${esc(t.n)}</option>`).join("")
+      + (ti?`<option value="none">Henüz emin değilim, bana önerin</option>`:"");
+    nTarget.value = [...nTarget.options].some(o=>o.value===keep) ? keep : "";
+  };
+  nName.value=S.name; nTitle.value=S.titleIdx; nYears.value=S.yearsIdx;
+  fillTargets(S.targetNone ? "none" : S.targetId); chk();
+  nTitle.addEventListener("change",()=>{ fillTargets(nTarget.value); chk(); });
+  [nYears,nTarget].forEach(e=>e.addEventListener("change",chk));
+  $go.addEventListener("click",()=>{
+    S.name=nName.value.trim(); S.titleIdx=nTitle.value; S.yearsIdx=nYears.value;
+    S.targetNone = nTarget.value==="none";
+    S.targetId = S.targetNone ? "" : nTarget.value;
+    S.answers=[]; S.pick=null; S.dAns={}; S.wantDisc=undefined; S.discMode=undefined; S.discSel=[]; S.screen="q0"; render();
+  });
+}
+
+function renderChoice(){
+  setStep(2);
+  app.innerHTML=`
+  <div class="card">
+    ${banner(5)}
+    <div class="prog-bar"><i style="width:${QUESTIONS.length/TOTAL_STEPS*100}%"></i></div>
+    <div class="bubble"><div class="avatar">M</div><div class="txt">
+      <div class="tag">BÖLÜM 1 TAMAMLANDI · İSTEĞE BAĞLI BÖLÜM</div>
+      <p>Teşekkürler, ilk bölümü tamamladık. İsterseniz satış, pazarlama, tedarik zinciri ve kalite gibi farklı disiplinlerde de size uygun bir yol olup olmadığına bakabiliriz. Bu, 5 kısa adım ve yaklaşık 3 dakika sürer. Atlarsanız raporunuz yalnızca mevcut kariyer alanınızı kapsar. Ne yapmak istersiniz?</p>
+    </div></div>
+    <div class="opts">
+      <button class="opt ${S.wantDisc&&S.discMode==="all"?"sel":""}" data-w="all"><span class="k">A</span><span><strong>Evet, dört disiplini de keşfedelim.</strong> Satış, pazarlama, tedarik zinciri ve kalite; raporuma bir "Disiplin Haritası" eklensin.</span></button>
+      <button class="opt ${S.wantDisc&&S.discMode==="pick"?"sel":""}" data-w="pick"><span class="k">B</span><span><strong>Sadece ilgilendiğim disiplinleri seçeyim.</strong> Yalnızca seçtiğim alanlar için daha kısa bir değerlendirme yapılsın.</span></button>
+      <button class="opt ${S.wantDisc===false?"sel":""}" data-w="no"><span class="k">C</span><span><strong>Hayır, raporumu şimdi oluşturalım.</strong> İstersem raporun sonundan bu bölüme sonradan geçebilirim.</span></button>
+    </div>
+    <div class="row"><button class="btn ghost" id="back">← Geri</button><span></span></div>
+  </div>`;
+  app.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{
+    const w=b.dataset.w;
+    if(w==="no"){ S.wantDisc=false; S.screen="report"; }
+    else {
+      if(S.discMode!==w){ S.dAns={}; }   // mod değişince önceki disiplin cevapları geçersiz
+      S.wantDisc=true; S.discMode=w;
+      S.screen = w==="pick" ? "dsel" : "d0";
+    }
+    render();
+  }));
+  app.querySelector("#back").addEventListener("click",()=>{ S.screen="q"+(QUESTIONS.length-1); render(); });
+}
+
+// Seçili moda göre kullanılacak adımlar: "all" tüm adımlar; "pick" yalnızca seçilen disiplinlerin senaryoları + beceri listesi
+function activeSteps(){
+  if(S.discMode!=="pick") return DSTEPS;
+  const items=DSTEPS.flatMap(s=>s.items||[]).filter(it=>(S.discSel||[]).includes(it.id));
+  const sel=S.discSel||[];
+  // Tek soruluk ilgi ölçümü: 2+ disiplinde "en çok cezbeden", tek disiplinde ilgi derecesi
+  const steps=[ sel.length>=3
+    ? {type:"rank", id:"pickInt", tag:"Disiplin Keşfi · İlgi Sıralaması",
+       text:"Seçtiğiniz disiplinleri, bir iş gününü yaşamak istediğiniz sıraya dizin. En çok istediğinizden başlayarak tıklayın; sıra numarası kutuda görünür, yeniden tıklamak seçimi kaldırır.",
+       options:()=>sel.map(k=>({v:k,text:DISC[k].day}))}
+    : sel.length===2
+    ? {type:"single", id:"pickInt", tag:"Disiplin Keşfi · İlgi",
+       text:"Seçtiğiniz disiplinler arasında, bir iş gününü yaşamayı en çok hangisinde istersiniz?",
+       options:()=>sel.map(k=>({v:k,text:DISC[k].day}))}
+    : {type:"single", id:"pickInt", tag:"Disiplin Keşfi · İlgi",
+       text:`${DISC[sel[0]].n} alanı sizi ne kadar cezbediyor? Bir iş günü şöyle: ${DISC[sel[0]].day}`,
+       options:()=>[{v:"hi",text:"Çok; bu işi yapmak için sabırsızlanırım."},{v:"mid",text:"Ilımlı; ilgimi çekiyor, daha iyi tanımak isterim."},{v:"low",text:"Biraz; açıkçası merak ediyorum."},{v:"unsure",text:"Emin değilim; henüz yeterince tanımıyorum."}]} ];
+  // Doğrulama: sıralama göreli bir ölçümdür; birinci tercihin mutlak ilgi düzeyini sorar
+  if(sel.length>=2){
+    const top=Array.isArray(S.dAns.pickInt)?S.dAns.pickInt[0]:S.dAns.pickInt;
+    steps.push({type:"single", id:"pickAbs", tag:"Disiplin Keşfi · İlgi Doğrulama",
+      text:`Birinci tercihiniz${top?` (${DISC[top].n})`:""} sizi gerçekten heyecanlandırıyor mu, yoksa seçeneklerin içinde yalnızca en az uzak olan mı?`,
+      options:()=>[{v:"hi",text:"Gerçekten heyecanlandırıyor; bu alana geçmek için aktif adım atmaya hazırım."},
+                   {v:"mid",text:"İlgimi çekiyor ama kesin değilim; önce yakından tanımak isterim."},
+                   {v:"low",text:"Diğerlerinden yalnızca daha az uzak; asıl motivasyonum başka bir yerde."}]});
+  }
+  for(let i=0;i<items.length;i+=2)
+    steps.push({type:"pair",tag:"Disiplin Keşfi · Yatkınlık",text:items.length-i>1?"Aşağıdaki iki durumda nasıl davranırdınız?":"Aşağıdaki durumda nasıl davranırdınız?",items:items.slice(i,i+2)});
+  steps.push(DSTEPS[DSTEPS.length-1]);
+  return steps;
+}
+
+function renderDiscSelect(){
+  setStep(2);
+  const sel=S.discSel||(S.discSel=[]);
+  const draw=()=>{
+    app.innerHTML=`
+    <div class="card">
+      ${banner(5)}
+      <div class="prog-bar"><i style="width:${QUESTIONS.length/TOTAL_STEPS*100}%"></i></div>
+      <div class="bubble"><div class="avatar">M</div><div class="txt">
+        <div class="tag">BÖLÜM 2 · DİSİPLİN SEÇİMİ</div>
+        <p>Hangi disiplinleri keşfetmek istersiniz? Bir veya birkaçını seçebilirsiniz; yalnızca seçtikleriniz değerlendirilir.</p>
+      </div></div>
+      <div class="opts" role="group">
+        ${DISC_KEYS.map(k=>`<button class="opt ${sel.includes(k)?"sel":""}" data-k="${k}" role="checkbox" aria-checked="${sel.includes(k)}"><span class="k">${sel.includes(k)?"✓":""}</span><span><strong>${esc(DISC[k].n)}</strong><br><span style="color:var(--muted);font-size:14px">${esc(DISC[k].typical)}</span></span></button>`).join("")}
+      </div>
+      <div class="row"><button class="btn ghost" id="back">← Geri</button><button class="btn" id="next" ${sel.length?"":"disabled"}>Devam →</button></div>
+    </div>`;
+    app.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{
+      const k=b.dataset.k;
+      if(sel.includes(k)){ sel.splice(sel.indexOf(k),1); delete S.dAns[k]; } else sel.push(k);
+      delete S.dAns.pickInt; delete S.dAns.pickAbs;   // seçim değişince ilgi soruları da geçersiz olur
+      draw();
+    }));
+    app.querySelector("#back").addEventListener("click",()=>{ S.screen="dchoice"; render(); });
+    app.querySelector("#next").addEventListener("click",()=>{ S.screen="d0"; render(); });
+  };
+  draw();
+}
+
+function renderDisc(di){
+  setStep(2);
+  const steps=activeSteps();
+  const st=steps[di], A=S.dAns, last=di===steps.length-1;
+  const groups = st.type==="pair" ? st.items.map(it=>({id:it.id,label:it.scenario,opts:it.options.map((o,i)=>({v:i,text:o.text}))}))
+                                  : [{id:st.id,label:null,opts:st.options(),multi:st.type==="multi"||st.type==="rank",rank:st.type==="rank"}];
+  const isSel=(g,v)=> g.multi ? (A[g.id]||[]).includes(v) : A[g.id]===v;
+  const badge=(g,o,i)=> g.rank ? ((A[g.id]||[]).indexOf(o.v)+1||"") : g.multi ? (isSel(g,o.v)?"✓":"") : "ABCDEF"[i];
+  const complete=()=> st.type==="multi" || groups.every(g=>g.rank ? (A[g.id]||[]).length===g.opts.length : A[g.id]!==undefined);
+  const draw=()=>{
+    app.innerHTML=`
+    <div class="card">
+      ${banner(5)}
+      <div class="prog-bar"><i style="width:${(QUESTIONS.length+di)/(QUESTIONS.length+steps.length)*100}%"></i></div>
+      <div class="bubble"><div class="avatar">M</div><div class="txt">
+        <div class="tag">BÖLÜM 2 · ADIM ${di+1} / ${steps.length} · ${esc(st.tag)}</div>
+        <p>${esc(st.text)}</p>
+      </div></div>
+      ${groups.map(g=>`<div style="margin-bottom:16px">
+        ${g.label?`<p style="margin:0 0 8px;font-weight:600">${esc(g.label)}</p>`:""}
+        <div class="opts" role="${g.multi?"group":"radiogroup"}">
+          ${g.opts.map((o,i)=>`<button class="opt ${isSel(g,o.v)?"sel":""}" data-g="${g.id}" data-v="${o.v}" role="${g.multi?"checkbox":"radio"}" aria-checked="${isSel(g,o.v)}"><span class="k">${badge(g,o,i)}</span><span>${esc(o.text)}</span></button>`).join("")}
+        </div></div>`).join("")}
+      <div class="row">
+        <button class="btn ghost" id="back">← Geri</button>
+        <button class="btn" id="next" ${complete()?"":"disabled"}>${last?"Raporu oluştur":"Sonraki adım"} →</button>
+      </div>
+    </div>`;
+    app.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{
+      const g=groups.find(x=>x.id===b.dataset.g);
+      const raw=b.dataset.v, v=isNaN(+raw) ? raw : +raw; // disiplin anahtarları metin, diğerleri sayı
+      if(g.multi){ const cur=A[g.id]||[]; A[g.id]=cur.includes(v)?cur.filter(x=>x!==v):[...cur,v]; }
+      else {
+        A[g.id]=v;
+        if(g.id==="most" && A.least===v) delete A.least;
+      }
+      draw();
+    }));
+    app.querySelector("#back").addEventListener("click",()=>{ S.screen = di===0?(S.discMode==="pick"?"dsel":"dchoice"):"d"+(di-1); render(); });
+    app.querySelector("#next").addEventListener("click",()=>{ S.screen = last?"report":"d"+(di+1); render(); });
+  };
+  draw();
+}
+
+function renderRankQuestion(qi){
+  setStep(2);
+  const q=QUESTIONS[qi], max=3;
+  let sel=(S.answers[qi]&&S.answers[qi].rank)||[];
+  const draw=()=>{
+    app.innerHTML=`
+    <div class="card">
+      ${banner(q.scene??qi)}
+      <div class="prog-bar"><i style="width:${(qi/TOTAL_STEPS)*100}%"></i></div>
+      <div class="bubble"><div class="avatar">M</div><div class="txt">
+        <div class="tag">BÖLÜM 1 · SORU ${qi+1} / ${QUESTIONS.length} · ${esc(q.tag)}</div>
+        <p>${esc(q.scenario(ctxFor(qi)))}</p>
+      </div></div>
+      <div class="opts" role="group">
+        ${q.values.map(o=>{const r=sel.indexOf(o.v)+1;return `<button class="opt ${r?"sel":""}" data-v="${o.v}" role="checkbox" aria-checked="${!!r}"><span class="k">${r||""}</span><span>${esc(o.text)}</span></button>`;}).join("")}
+      </div>
+      <div class="hint">Seçilen: ${sel.length} / ${max}. Yeniden tıklamak seçimi kaldırır.</div>
+      <div class="row">
+        <button class="btn ghost" id="back">← Geri</button>
+        <button class="btn" id="next" ${sel.length===max?"":"disabled"}>${qi===QUESTIONS.length-1?"Devam":"Sonraki soru"} →</button>
+      </div>
+    </div>`;
+    app.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{
+      const v=b.dataset.v;
+      if(sel.includes(v)) sel=sel.filter(x=>x!==v);
+      else if(sel.length<max) sel=[...sel,v];
+      draw();
+    }));
+    app.querySelector("#back").addEventListener("click",()=>{ S.screen=qi===0?"intro":"q"+(qi-1); render(); });
+    app.querySelector("#next").addEventListener("click",()=>{
+      S.answers[qi]={rank:sel};
+      S.screen = qi===QUESTIONS.length-1?"dchoice":"q"+(qi+1); render();
+    });
+  };
+  draw();
+}
+
+function renderQuestion(qi){
+  if(QUESTIONS[qi].type==="rank") return renderRankQuestion(qi);
+  setStep(2);
+  const q=QUESTIONS[qi], ctx=ctxFor(qi);
+  const opts=q.options(ctx);
+  S.pick = S.answers[qi] ? S.answers[qi].i : null;
+  app.innerHTML="";
+  const node=$(`
+  <div class="card">
+    ${banner(q.scene??qi)}
+    <div class="prog-bar"><i style="width:${(qi/TOTAL_STEPS)*100}%"></i></div>
+    <div class="bubble"><div class="avatar">M</div><div class="txt">
+      <div class="tag">BÖLÜM 1 · SORU ${qi+1} / ${QUESTIONS.length} · ${esc(q.tag)}</div>
+      <p>${esc(q.scenario(ctx))}</p>
+    </div></div>
+    <div class="opts" role="radiogroup">
+      ${opts.map((o,i)=>`<button class="opt ${S.pick===i?"sel":""}" data-i="${i}" role="radio" aria-checked="${S.pick===i}"><span class="k">${"ABCDEF"[i]}</span><span>${esc(o.text)}</span></button>`).join("")}
+    </div>
+    <div class="row">
+      <button class="btn ghost" id="back">← Geri</button>
+      <button class="btn" id="next" ${S.pick===null?"disabled":""}>${qi===QUESTIONS.length-1?"Devam":"Sonraki soru"} →</button>
+    </div>
+  </div>`);
+  app.appendChild(node);
+  const next=node.querySelector("#next");
+  node.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{
+    S.pick=+b.dataset.i;
+    node.querySelectorAll(".opt").forEach(x=>{const on=+x.dataset.i===S.pick;x.classList.toggle("sel",on);x.setAttribute("aria-checked",on)});
+    next.disabled=false;
+  }));
+  node.querySelector("#back").addEventListener("click",()=>{
+    S.screen = qi===0?"intro":"q"+(qi-1); render();
+  });
+  next.addEventListener("click",()=>{
+    const prev=S.answers[qi];
+    S.answers[qi]={i:S.pick};
+    // önceki cevap değiştiyse sonraki dallanmalar geçersiz olabilir
+    if(prev && prev.i!==S.pick) S.answers.length=qi+1;
+    S.screen = qi===QUESTIONS.length-1?"dchoice":"q"+(qi+1);
+    render();
+  });
+}
+
+/* ============ HESAPLAMA ============ */
+function compute(){
+  const family=TITLES[S.titleIdx].f, years=YEARS[S.yearsIdx].n;
+  let sumD=0,nD=0, T=0,H=0,C=0, mT=0,mH=0,mC=0;
+  const anc={TF:0,GM:0,AU:0,SE:0,EC:0,SV:0,CH:0,LS:0};
+  QUESTIONS.forEach((q,qi)=>{
+    if(q.type==="rank") return;   // değer sıralaması motivasyon profiline girer, beceri puanına değil
+    const opts=q.options(ctxFor(qi)), o=opts[S.answers[qi].i];
+    if(o.d>0){sumD+=o.d;nD++}
+    T+=o.t;H+=o.h;C+=o.c;
+    mT+=Math.max(...opts.map(x=>x.t)); mH+=Math.max(...opts.map(x=>x.h)); mC+=Math.max(...opts.map(x=>x.c));
+    Object.entries(o.a).forEach(([k,v])=>anc[k]+=v);
+  });
+  const yearsLevel = years<1?1: years<3?2: years<6?3: years<10?4:4.5;
+  const dreyfus = Math.min(5, Math.max(1, 0.7*(sumD/nD)+0.3*yearsLevel));
+  const tech = Math.min(100, (T/mT)*88 + Math.min(years,10)*1.2);
+  const human = Math.min(100, (H/mH)*100);
+  const conc = Math.min(100, (C/mC)*100);
+  const prof={dreyfus,tech,human,conc};
+
+  const fit=(t)=>{
+    const [rd,rt,rh,rc]=t.req;
+    let f=100 - Math.max(0,rd-dreyfus)*10 - 0.4*(Math.max(0,rt-tech)+Math.max(0,rh-human)+Math.max(0,rc-conc));
+    const pref = t.type==="vertical"?anc.GM : t.type==="expert"?anc.TF+anc.CH : anc.SV+anc.EC+anc.AU;
+    f += Math.min(5,pref)-2.5; // çıpa uyumu: -2.5..+2.5
+    return Math.max(5,Math.min(98,Math.round(f)));
+  };
+  const scored=TARGETS.filter(t=>eligible(t,TITLES[S.titleIdx])).map(t=>({t,fit:fit(t)})).sort((a,b)=>b.fit-a.fit);
+  const suggested=!S.targetId;
+  // öneri modunda dikey yükselişe öncelik: sıralamaya +25 puan (gösterilen uyum skoru değişmez).
+  // Yalnızca uyumu en az %55 olan dikey roller bonus alır; çok uzak bir role yönlendirmemek için.
+  const VERTICAL_BONUS=25, VERTICAL_MIN_FIT=55;
+  const rank=x=>x.fit+(x.t.type==="vertical"&&x.fit>=VERTICAL_MIN_FIT?VERTICAL_BONUS:0);
+  const pick=()=>[...scored].sort((a,b)=>rank(b)-rank(a))[0];
+  const target = suggested ? pick() : scored.find(x=>x.t.id===S.targetId);
+
+  const V=Math.max(0.5, anc.GM*2 + (conc-50)/10 + (human-50)/15);
+  const E=Math.max(0.5, (anc.TF+anc.CH*0.5)*2 + (tech-50)/10);
+  const L=Math.max(0.5, (anc.SV+anc.EC*1.5+anc.AU*0.7)*1.5 + (human-50)/15);
+  // öneri modunda dikey rota da öne çıkarılır (hedef dikey bir rol seçildiyse)
+  // dikey hedef önerildiyse rota da tutarlı olsun: dikey, en güçlü rakibinin %5 üstüne çıkar
+  const vBoost = (suggested && target.t.type==="vertical") ? Math.max(1.6, Math.max(E,L)/V*1.05) : 1;
+  const sum=V*vBoost+E+L;
+  const routes=[
+    {id:"vertical",n:"Dikey Yükselme (Yöneticilik)",s:V*vBoost/sum},
+    {id:"expert",n:"Derin Uzmanlık (Kıdemli Uzman / Teknik Referans)",s:E/sum},
+    {id:"lateral",n:"Yatay Geçiş (Farklı departman / rol)",s:L/sum}
+  ].sort((a,b)=>b.s-a.s);
+
+  return {family,years,prof,anc,scored,target,suggested,routes};
+}
+
+/* ============ RAPOR ============ */
+function radar(prof,req){
+  const cx=150,cy=140,R=95;
+  const ang=[-90,30,150].map(a=>a*Math.PI/180);
+  const pt=(v,i)=>[cx+R*(v/100)*Math.cos(ang[i]), cy+R*(v/100)*Math.sin(ang[i])];
+  const poly=(vals)=>vals.map((v,i)=>pt(v,i).join(",")).join(" ");
+  const grid=[25,50,75,100].map(g=>`<polygon points="${poly([g,g,g])}" fill="none" stroke="var(--line)"/>`).join("");
+  const axes=ang.map((a,i)=>`<line x1="${cx}" y1="${cy}" x2="${pt(100,i)[0]}" y2="${pt(100,i)[1]}" stroke="var(--line)"/>`).join("");
+  const lab=[["Teknik",cx,cy-R-10,"middle"],["Beşeri",cx+R*Math.cos(ang[1])+8,cy+R*Math.sin(ang[1])+18,"start"],["Kavramsal",cx+R*Math.cos(ang[2])-8,cy+R*Math.sin(ang[2])+18,"end"]]
+    .map(l=>`<text x="${l[1]}" y="${l[2]}" text-anchor="${l[3]}" font-size="12" fill="var(--muted)">${l[0]}</text>`).join("");
+  return `<svg viewBox="0 0 300 275" width="100%" style="max-width:300px" role="img" aria-label="Katz beceri dengesi grafiği">
+    ${grid}${axes}
+    <polygon points="${poly(req)}" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>
+    <polygon points="${poly([prof.tech,prof.human,prof.conc])}" fill="var(--brand)" fill-opacity=".22" stroke="var(--brand)" stroke-width="2"/>
+    ${lab}</svg>`;
+}
+function gauge(p){
+  const r=62,c=2*Math.PI*r, off=c*(1-p/100);
+  const col = p>=80?"var(--good)":p>=60?"var(--brand)":"var(--warn)";
+  return `<svg viewBox="0 0 160 160" width="160" height="160" role="img" aria-label="Uyum skoru %${p}">
+    <circle cx="80" cy="80" r="${r}" fill="none" stroke="var(--line)" stroke-width="13"/>
+    <circle cx="80" cy="80" r="${r}" fill="none" stroke="${col}" stroke-width="13" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 80 80)"/>
+    <text x="80" y="78" text-anchor="middle" font-size="34" font-weight="700" fill="var(--ink)">%${p}</text>
+    <text x="80" y="100" text-anchor="middle" font-size="12" fill="var(--muted)">uyumlu</text></svg>`;
+}
+
+const ACTIONS = {
+  tech:"Hedef rolün gerektirdiği platform/modül sertifikalarını tamamlayın; karmaşık arızalarda sistematik kök neden analizi (5 Neden, Ishikawa) uygulayıp vakaları dokümante edin. Bir kıdemli uzmanla çift çalışma (pair-troubleshooting) talep edin.",
+  human:"Zor müşteri görüşmeleri için iletişim ve çatışma yönetimi eğitimi alın. Bir junior çalışana mentorluk yapın; geri bildirim verme ve almayı düzenli bir pratik haline getirin.",
+  conc:"Kendi bölgenizin veya ekibinizin KPI'larını (ilk seferde çözüm oranı, MTTR, tekrar eden arıza) analiz edip yönetime tek sayfalık bir iyileştirme önerisi sunun. Kalite/regülasyon temelleri (ISO 13485, IVDR) ve süreç yönetimi konusunda temel eğitim alın.",
+  dreyfus:"Standart prosedürün ötesinde karar verdiğiniz durumları artırın: vaka paylaşım toplantılarında çözüm yaklaşımınızı anlatın, istisnai durumlar için kendi karar notlarınızı tutun. Yetkinlik seviyesi, bilgiden çok bağlamı okuyarak karar verebilmekle ilerler."
+};
+const PHASES = {
+ vertical:[
+  ["0–6 ay · Temel",["Ekip içinde gayriresmi teknik lider rolü alın (vaka paylaşımı, onboarding desteği)","Yöneticinizle hedef pozisyon için beklentileri netleştiren bir 1:1 yapın","Bir junior'a mentorluk üstlenin"]],
+  ["6–12 ay · Kanıt",["Ölçülebilir bir iyileştirme projesi yürütün (MTTR, ilk seferde çözüm vb.)","Liderlik, koçluk ve çatışma yönetimi eğitimi alın","Kalite ve ürün ekipleriyle çapraz iş birliği kurun"]],
+  ["12–24 ay · Geçiş",["Vekâleten takım liderliği / proje sorumluluğu alın","Bütçe, kapasite planlama ve KPI yönetimi deneyimi edinin","Aday havuzu / yetenek değerlendirmesine girin"]]],
+ expert:[
+  ["0–6 ay · Derinleşme",["En kritik platform/modülde ileri seviye sertifikasyon hedefleyin","Zor vakaları dokümante edip bilgi tabanına ekleyin","Üretici/ürün destek ekipleriyle doğrudan çalışma ilişkisi kurun"]],
+  ["6–12 ay · Görünürlük",["Ekip içi teknik eğitimler verin, 'ilk başvurulan kişi' olun","Yeni ürün lansmanlarında pilot/doğrulama rolü alın","Kök neden analizi standartlarını ekip adına siz oluşturun"]],
+  ["12–24 ay · Referans",["Kıdemli Uzman / SME unvanı için dosya hazırlayın","Bölgeler arası eskalasyon noktası olun","Regülasyon/kalite bilginizi (IVDR, ISO 13485) teknik uzmanlığınızla birleştirin"]]],
+ lateral:[
+  ["0–6 ay · Keşif",["Hedef departmandan bir kişiyle gölgeleme (job shadowing) yapın","Hedef rolün yetkinlik matrisini isteyin ve eksiklerinizi çıkarın","Ortak bir proje/vaka ile görünürlük kazanın"]],
+  ["6–12 ay · Hazırlık",["Hedef rol için gerekli platform, uygulama veya eğitmen sertifikalarını tamamlayın","Kısa süreli rotasyon veya geçici görevlendirme talep edin","Mevcut rolünüzdeki bilgiyi dokümante ederek devre hazır hale getirin"]],
+  ["12–24 ay · Geçiş",["Resmi rol geçişi ve ilk 90 gün planı","Eski ekiple 'köprü' rolü (saha-aplikasyon-atölye bilgi aktarımı)","Yeni rolde ilk 6 ay için başarı ölçütlerini yöneticinizle yazılı belirleyin"]]]
+};
+const LATERAL_DEST = {
+  field:"Aplikasyon Uzmanı, Teknik Eğitmen veya Ürün/Çözüm Uzmanı",
+  app:"Saha Servis (karma rol), Teknik Eğitmen veya Ürün/Çözüm Uzmanı",
+  work:"Saha Servis Mühendisi (atölyeden sahaya geçiş), Teknik Destek veya Kalite Uzmanlığı",
+  lead:"Eğitim, Ürün/Çözüm veya Kalite/Operasyon fonksiyonları"
+};
+
+/* ============ MOTİVASYON PROFİLİ ============ */
+const MOT={
+  ext:{n:"Dış ödül (maaş, unvan, statü)", measure:"gelir ve unvan basamağı",
+       body:"Kariyer kararlarınızda görünür ve ölçülebilir ilerleme (gelir, unvan, statü) sizin için belirleyici. Bu meşru bir önceliktir; amaç onu doğru rotayla eşleştirmektir."},
+  growth:{n:"Gelişim ve anlam", measure:"yeni platformlar, sertifikasyonlar ve üstlendiğiniz zor işler",
+       body:"Yeni şeyler öğrenmek, zor problemleri çözmek ve anlamlı bir etki bırakmak sizin için gelir ve unvandan önce geliyor."},
+  auto:{n:"Özerklik ve denge", measure:"karar yetkiniz, esnek çalışma ve iş yükü dengesi",
+       body:"Kendi önceliklerinizi belirleyebilmek ve iş-yaşam dengesini korumak sizin için öne çıkıyor."},
+  sec:{n:"Güvence ve ilişkiler", measure:"net görev tanımı, istikrarlı kadro ve ekip uyumu",
+       body:"Öngörülebilirlik, iş güvencesi ve iyi bir ekip, sizin için kariyer kararlarında ağır basıyor."}
+};
+function computeMotivation(){
+  const ti=QUESTIONS.findIndex(q=>q.id==="tradeoff"), vi=QUESTIONS.findIndex(q=>q.id==="values");
+  const raw={ext:0,growth:0,auto:0,sec:0};
+  const trade=QUESTIONS[ti].options({})[S.answers[ti].i];
+  raw[trade.m]+=3;
+  const rank=S.answers[vi].rank, vals=QUESTIONS[vi].values, w=[3,2,1];
+  const statedRaw={ext:0,growth:0,auto:0,sec:0};
+  rank.forEach((v,i)=>{ const m=vals.find(x=>x.v===v).m; raw[m]+=w[i]; statedRaw[m]+=w[i]; });
+  const total=Object.values(raw).reduce((a,b)=>a+b,0);
+  const share=Object.fromEntries(Object.entries(raw).map(([k,v])=>[k,Math.round(v/total*100)]));
+  const firstDim=vals.find(x=>x.v===rank[0]).m;
+  const order=Object.keys(raw).sort((a,b)=>raw[b]-raw[a]||(a===firstDim?-1:b===firstDim?1:0));
+  return {share,top:order[0],second:order[1],stated:firstDim,revealed:trade.m,
+          payTitle: rank.includes("pay")&&!rank.includes("title")?"pay": rank.includes("title")&&!rank.includes("pay")?"title": trade.x||""};
+}
+function motivationSection(R){
+  const M=computeMotivation(), t=R.target.t, p=R.prof, top=MOT[M.top];
+  // hedefle ilişkilendirme
+  let link="";
+  if(M.top==="ext"){
+    if(t.type==="vertical") link = p.conc<t.req[3]
+      ? `Hedefiniz (${esc(t.n)}) gelir ve unvan beklentinizi destekleyen bir yol; ancak kavramsal beceri puanınız ${Math.round(p.conc)}, hedef ise ${t.req[3]}. Bu boşluğu kapatmadan geçiş zor olabilir.`
+      : `Hedefiniz (${esc(t.n)}) gelir ve unvan beklentinizle örtüşüyor ve beceri profiliniz bu yola uygun görünüyor.`;
+    else link=`Hedefiniz (${esc(t.n)}) yönetici olmayan bir yol. Unvan ve gelir sizin için önemliyse, Kıdemli Uzman / Teknik Referans basamaklarının unvan ve gelir karşılığını İK ile netleştirin; bu bilgi kuruma özgüdür.`;
+    if(M.payTitle==="title") link+=" Not: unvan (statü) gelirden daha ağır basıyor; bu durumda rolün unvan basamaklarını ve terfi kriterlerini öğrenmek öncelikli olabilir.";
+    if(M.payTitle==="pay") link+=" Not: gelir unvandan daha ağır basıyor; bu durumda hangi rolün hangi gelir basamağına denk geldiğini öğrenmek öncelikli olabilir.";
+  } else if(t.type==="vertical"){
+    const loss={growth:"yönetici rolünde günlük işin ağırlığı teknik problem çözmekten insan, bütçe ve koordinasyona kayar; öğrenme alanınız değişir",
+                auto:"yönetici rolünde takviminiz ve önceliklerinizin büyük kısmı başkalarının ihtiyaçlarıyla belirlenir; özerklik ve denge çoğu zaman azalır",
+                sec:"yönetici rolünde sorumluluk ve belirsizlik artar; öngörülebilirlik çoğu zaman azalır"}[M.top];
+    link=`Hedefiniz (${esc(t.n)}) yönetici yoluna işaret ediyor, ancak ana motivasyonunuz "${top.n}". Dikkat: ${loss}. Karar vermeden önce bu rolde çalışan biriyle bir iş gününü birlikte geçirmenizi öneririm.`;
+  } else if(M.top==="sec" && t.type==="lateral"){
+    link=`Hedefiniz (${esc(t.n)}) bir yatay geçiş ve geçiş döneminde geçici belirsizlik olur. Güvence sizin için önemli olduğundan ani geçiş yerine gölgeleme ve rotasyonla kademeli ilerleyin.`;
+  } else {
+    link=`Hedefiniz (${esc(t.n)}) ana motivasyonunuz olan "${top.n}" ile uyumlu görünüyor.`;
+  }
+  const consistency = M.stated===M.revealed
+    ? "Sıralamada belirttiğiniz ilk değer ile ödünleşim senaryosundaki tercihiniz tutarlı."
+    : `Sıralamada ilk sırayı <strong>${MOT[M.stated].n}</strong> aldı, ödünleşim senaryosunda ise <strong>${MOT[M.revealed].n}</strong> yönünü seçtiniz. Bu fark gerçek bir ikilemin işareti olabilir; bir teklif geldiğinde hangisinden vazgeçmeyi göze aldığınızı önceden netleştirin.`;
+  const bars=Object.entries(M.share).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar"><div class="l"><span>${MOT[k].n}</span><span>%${v}</span></div><div class="t"><b style="width:${v}%"></b></div></div>`).join("");
+  return `<div class="sec c7">
+    <h3>${ico("coin")}Motivasyon Profili · Neyi Önceliklendiriyorsunuz?</h3>
+    <p style="margin:0 0 8px"><strong>Baskın motivasyonunuz: ${top.n}.</strong> ${top.body}</p>
+    ${bars}
+    <p style="margin:10px 0 6px">${link}</p>
+    <p class="hint" style="margin-top:6px">${consistency}</p>
+    <p style="margin:12px 0 4px"><strong>Bir teklifi değerlendirirken kendinize sorun:</strong></p>
+    <ul style="margin:0;padding-left:18px;font-size:14px">
+      <li>Bu teklif, bana en önemli olan "${top.n}" konusunda 12 ay sonra ne sağlıyor?</li>
+      <li>Karşılığında vazgeçeceğim şey (gelir, öğrenme, özerklik, güvence) ne ve buna razı mıyım?</li>
+      <li>Günlük işim nasıl değişiyor, bu değişiklik beni enerjilendirir mi?</li>
+      <li>Memnun kalmazsam geri dönüş seçeneğim var mı?</li>
+    </ul>
+    <p style="margin:12px 0 4px"><strong>Yöneticinizle konuşmak için bir başlangıç:</strong> "Önümüzdeki 12 ayda benim için ilerleme şu şekilde ölçülsün: ${top.measure}."</p>
+    <p class="note">Bu profil bir eğilim gösterir, kalıcı bir kişilik etiketi değildir. Ekonomik koşullar ve yaşam evresi önceliklerinizi değiştirebilir. Maaş ve unvan meşru kariyer hedefleridir; amaç hangi önceliğin doğru olduğuna karar vermek değil, tercihlerinizi bilinçli yapmanızı sağlamaktır.</p>
+  </div>`;
+}
+
+function renderReport(){
+  setStep(3);
+  const R=compute(), p=R.prof, t=R.target.t, fit=R.target.fit;
+  const DISCS = S.wantDisc ? computeDisc(p) : [];
+  const WEAK={interest:"ilgi düzeyi düşük; önce bu alanı yakından tanımak için bir departman çalışanıyla görüşün.",apt:"disiplin senaryosundaki yaklaşımınız bu alanın beklentisinden uzak; bu alanın tipik karar mantığını (ticari, planlama veya uyumluluk bakışı) pratik edin.",tr:"bugünkü görevlerinizle örtüşme az; hedef disiplinden bir görevi proje olarak üstlenmek köprüyü kurar.",pr:"genel beceri profiliniz bu alanın gerektirdiğinden geride; ilgili beceriyi (iletişim, süreç yönetimi veya teknik derinlik) geliştirin."};
+  DISCS.forEach(d=>{ const e=Object.entries(d.parts).sort((a,b)=>a[1]-b[1])[0]; d.weakest = e[1]<60 ? WEAK[e[0]] : ""; });
+  const topAnc=Object.entries(R.anc).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>0).slice(0,3);
+  const maxA=Math.max(1,...topAnc.map(x=>x[1]));
+  const lvl=Math.round(p.dreyfus);
+  const [rd,rt,rh,rc]=t.req;
+  const rows=[
+    ["Teknik Beceri",p.tech,rt,"tech"],["Beşeri Beceri (İletişim)",p.human,rh,"human"],["Kavramsal Beceri (Liderlik)",p.conc,rc,"conc"]
+  ];
+  const strengths=[], gaps=[];
+  rows.forEach(([n,v,r,k])=>{ (v>=r-5?strengths:gaps).push({n,v:Math.round(v),r,k}); });
+  (p.dreyfus>=rd-0.3?strengths:gaps).push({n:"Dreyfus Uzmanlık Seviyesi",v:p.dreyfus.toFixed(1),r:rd,k:"dreyfus"});
+
+  const top=R.routes[0], title=TITLES[S.titleIdx].v;
+  const routeBlock=(r,rec)=>`<div class="route ${rec?"rec":""}"><h4>${esc(r.n)} ${rec?'<span class="chip" style="margin-left:6px">Önerilen</span>':""}</h4>
+     <div class="bar"><div class="t"><b style="width:${Math.round(r.s*100)}%"></b></div></div>
+     <div class="hint">Profil yatkınlığı: %${Math.round(r.s*100)}</div></div>`;
+
+  let mismatch="";
+  if(!R.suggested && t.type!==top.id){
+    const lbl={vertical:"dikey",expert:"derin uzmanlık",lateral:"yatay"};
+    mismatch=`<p><strong>Dikkat:</strong> Hedefiniz <em>${esc(t.n)}</em> ağırlıklı olarak <em>${lbl[t.type]}</em> bir yol; ancak motivasyon çıpalarınız ve beceri dengeniz <em>${esc(top.n)}</em> rotasına daha yatkın görünüyor. Bu bir engel değil; hedefi koruyabilirsiniz, ancak gelişim planını bu farkı bilerek kurmanız gerekir.</p>`;
+  }
+  if(R.suggested && t.type==="vertical" && fit<70){
+    mismatch+=`<p><strong>Not:</strong> Dikey yükselişi öncelikli tuttuğum için bu pozisyonu önerdim; mevcut uyumunuz %${fit}. Aşağıdaki 'Geliştirilmesi gereken yetkinlikler' bölümü bu farkı kapatmak için ilk odak noktanız olmalı.</p>`;
+  }
+  const phases=PHASES[top.id];
+  const verdict = fit>=80?"Profiliniz hedefle büyük ölçüde örtüşüyor; kısa vadede hazır olmanızı sağlayacak küçük gelişim adımları yeterli olabilir."
+    : fit>=60?"Temel uyum var; birkaç belirli yetkinlikte hedeflenmiş gelişim ile 12–18 ay içinde güçlü aday olabilirsiniz."
+    : "Hedef ile mevcut profil arasında belirgin bir fark var; bu bir engel değil, planlı bir gelişim yolculuğu gerektiriyor.";
+
+  app.innerHTML=`
+  <div class="rep" id="report">
+    <div class="sec hero-sec c1">
+      ${DECO_SVG}
+      <h2>Kariyer Öz Değerlendirme Raporu</h2>
+      <div class="meta">${S.name?esc(S.name)+" · ":""}${esc(title)} · ${YEARS[S.yearsIdx].v} · ${new Date().toLocaleDateString("tr-TR")}</div>
+      <div class="hero">
+        <div>${gauge(fit)}</div>
+        <div>
+          <div class="big">${R.suggested?"Size önerilen hedef pozisyon":"Hedeflenen pozisyona uyum skoru"}</div>
+          <h3 style="font-size:19px;margin:2px 0 8px">${esc(t.n)}</h3>
+          <div>
+            <span class="chip">Dreyfus: ${DREYFUS[lvl]}</span>
+            ${topAnc.map(([k])=>`<span class="chip good">${esc(ANCHORS[k])}</span>`).join("")}
+          </div>
+          <p style="margin:6px 0 0;color:var(--muted);font-size:14px">${verdict}</p>
+          ${R.suggested?`<p class="hint">Not: Hedef belirtmediğiniz için ${R.scored.length} olası pozisyon arasından, dikey yükselişi öncelikli tutarak profilinize en uygun olanı seçtim.</p>`:""}
+        </div>
+      </div>
+    </div>
+
+    <div class="sec c2">
+      <h3>${ico("radar")}Beceri Dengesi · Katz Modeli</h3>
+      <div class="two">
+        <div style="text-align:center">${radar(p,[rt,rh,rc])}<div class="hint">Dolu alan: mevcut profiliniz · Kesikli çizgi: hedef pozisyon beklentisi</div></div>
+        <div>
+          ${rows.map(([n,v,r])=>`<div class="bar"><div class="l"><span>${n}</span><span>${Math.round(v)} / hedef ${r}</span></div><div class="t"><b style="width:${Math.round(v)}%"></b><u style="left:${r}%"></u></div></div>`).join("")}
+          <div class="bar"><div class="l"><span>Dreyfus Seviyesi</span><span>${p.dreyfus.toFixed(1)} / hedef ${rd}</span></div><div class="t"><b style="width:${p.dreyfus/5*100}%"></b><u style="left:${rd/5*100}%"></u></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec c3">
+      <h3>${ico("gap")}Boşluk Analizi (Gap Analysis)</h3>
+      <div class="two">
+        <div>
+          <p style="margin:0 0 6px;font-weight:600;color:var(--good)">Güçlü yönleriniz</p>
+          ${strengths.length?strengths.map(s=>`<div class="gap g"><h4>${s.n}</h4><p>Mevcut ${s.v} · hedef ${s.r}. Bu alan hedef pozisyonun beklentisini karşılıyor.</p></div>`).join(""):"<p class='hint'>Bu hedef için henüz beklentiyi karşılayan bir alan görünmüyor; gelişim planı tüm alanlarda dengeli ilerlemeli.</p>"}
+        </div>
+        <div>
+          <p style="margin:0 0 6px;font-weight:600;color:var(--warn)">Geliştirilmesi gereken yetkinlikler</p>
+          ${gaps.length?gaps.map(s=>`<div class="gap w"><h4>${s.n} <span class="chip warn">${s.v} → ${s.r}</span></h4><p>${ACTIONS[s.k]}</p></div>`).join(""):"<p class='hint'>Belirgin bir eksik yok; odak sürdürülebilirlik ve görünürlük olmalı.</p>"}
+        </div>
+      </div>
+    </div>
+
+    <div class="sec c4">
+      <h3>${ico("compass")}Kariyer Çıpalarınız · Schein</h3>
+      ${topAnc.map(([k,v])=>`<div class="bar"><div class="l"><span>${esc(ANCHORS[k])}</span></div><div class="t"><b style="width:${Math.round(v/maxA*100)}%"></b></div></div>`).join("")}
+    </div>
+
+    ${motivationSection(R)}
+
+    <div class="sec c5">
+      <h3>${ico("map")}Kariyer Yolu Haritası</h3>
+      ${R.routes.map((r,i)=>routeBlock(r,i===0)).join("")}
+      ${mismatch}
+      <p style="margin:12px 0 4px"><strong>${esc(top.n)}</strong> rotası için önerilen adımlar:</p>
+      ${top.id==="lateral"?`<p class="hint" style="margin-top:0">Rolünüze göre olası yatay hedefler: ${esc(LATERAL_DEST[R.family])}.</p>`:""}
+      <div class="phases">
+        ${phases.map(ph=>`<div class="phase"><h5>${ph[0]}</h5><ul>${ph[1].map(x=>`<li>${x}</li>`).join("")}</ul></div>`).join("")}
+      </div>
+      <p class="note">Bu rapor durumsal sorulara dayalı bir öz değerlendirmedir; Dreyfus, Katz ve Schein modellerinin basitleştirilmiş bir uygulamasıdır. Psikometrik bir test veya performans değerlendirmesi yerine geçmez; yöneticiniz ve İK ile yapacağınız kariyer görüşmesi için bir başlangıç noktası olarak kullanın.</p>
+    </div>
+
+    ${!S.wantDisc ? `<div class="sec c6 no-print"><h3>${ico("brief")}Farklı disiplinlerde kariyer</h3>
+      <p style="margin:0 0 10px">Disiplin keşfi bölümünü atladınız. İsterseniz satış, pazarlama, tedarik zinciri ve kalite alanlarına uygunluğunuzu şimdi ölçebilirsiniz; sonuç bu rapora eklenir.</p>
+      <button class="btn" id="goDisc">Disiplin keşfini yap →</button></div>` : `<div class="sec c6">
+      <h3>${ico("brief")}Disiplin Haritası · Farklı Alanlarda Kariyer</h3>
+      <p class="hint" style="margin-top:0">Her disiplin dört kaynaktan hesaplandı: ilgi (%30), disiplin senaryosundaki yatkınlık (%30), bugünkü görevlerinizden aktarılabilir beceri (%25) ve genel beceri profiliniz (%15).</p>
+      ${DISCS.map((d,i)=>{
+        const lbl=d.score>=70?["Güçlü uyum","good"]:d.score>=50?["Geliştirilebilir","warn"]:["Şu an düşük uyum",""];
+        const w=d.weakest;
+        return `<div class="disc ${i===0?"top":""}">
+          <div class="h"><span>${esc(d.D.n)} ${i===0?'<span class="chip" style="margin-left:6px">En yüksek uyum</span>':""}</span><span class="chip ${lbl[1]}">${lbl[0]} · %${d.score}</span></div>
+          <div class="bar" style="margin:6px 0 2px"><div class="t"><b style="width:${d.score}%"></b></div></div>
+          <div class="parts">İlgi ${d.parts.interest} · Yatkınlık ${d.parts.apt} · Aktarılabilir beceri ${d.parts.tr} · Profil ${d.parts.pr}</div>
+          ${i===0||d.score>=60?`<p><strong>Tipik gün:</strong> ${esc(d.D.typical)}</p><p><strong>Köprü rol:</strong> ${esc(d.D.bridge)}</p><p><strong>İlk adım:</strong> ${esc(d.D.first)}</p>`
+                             :`<p class="hint">Bu alan şu an öncelikli görünmüyor; ilgi ve yatkınlık zamanla değişebilir.</p>`}
+          ${i===0&&w?`<p><strong>En zayıf bileşen:</strong> ${w}</p>`:""}
+        </div>`;}).join("")}
+      ${S.discMode==="pick"?`<p class="hint">Yalnızca seçtiğiniz disiplinler değerlendirildi; ilgi puanı tek bir soruyla ölçüldü (üç ve üzeri disiplinde sıralama, iki disiplinde tercih, tek disiplinde ilgi derecesi). İki ve üzeri disiplinde birinci tercihinizin mutlak ilgi düzeyi ayrıca doğrulandı. Seçmediğiniz disiplinler karşılaştırmaya dahil edilmedi; bu nedenle skorlar dört disiplinli değerlendirmeyle birebir kıyaslanamaz.</p>`:""}
+      <p class="note">Disiplin haritası bir yönlendirme başlangıcıdır. Gerçek doğrulama, ilgilendiğiniz departmanda gölgeleme (job shadowing), kısa görevlendirme ve yönetici/İK görüşmesiyle yapılmalıdır.</p>
+    </div>`}
+
+    <div class="actions no-print">
+      <button class="btn" id="pdf">PDF olarak indir / yazdır</button>
+      <button class="btn ghost" id="restart">Yeniden başla</button>
+    </div>
+    <p class="hint no-print">PDF için açılan pencerede hedef olarak "PDF olarak kaydet" seçeneğini kullanın.</p>
+  </div>`;
+  document.getElementById("pdf").addEventListener("click",()=>window.print());
+  const gd=document.getElementById("goDisc");
+  if(gd) gd.addEventListener("click",()=>{ S.wantDisc=undefined; S.screen="dchoice"; render(); });
+  document.getElementById("restart").addEventListener("click",()=>{
+    S.answers=[];S.pick=null;S.dAns={};S.wantDisc=undefined;S.discMode=undefined;S.discSel=[];S.screen="intro";render();
+  });
+}
+
+function render(){
+  if(S.screen==="intro") renderIntro();
+  else if(S.screen==="report") renderReport();
+  else if(S.screen==="dchoice") renderChoice();
+  else if(S.screen==="dsel") renderDiscSelect();
+  else if(S.screen[0]==="d") renderDisc(+S.screen.slice(1));
+  else renderQuestion(+S.screen.slice(1));
+  window.scrollTo({top:0});
+}
+render();
+</script>
+</body>
+</html>
