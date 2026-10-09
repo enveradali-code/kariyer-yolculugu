@@ -64,6 +64,7 @@ body{background:var(--bg) radial-gradient(circle at 100% 0,rgba(247,162,58,.18),
 .b5{background:linear-gradient(120deg,#0e8a8c,#a23b72)}
 .b6{background:linear-gradient(120deg,#f2a516,#d9480f)}
 .sec.c7{--c:var(--gold)}
+.sec.c8{--c:var(--plum)}
 .sec.c6{--c:var(--teal)}
 .disc{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
 .disc.top{border-color:var(--teal);background:var(--good-soft)}
@@ -182,8 +183,6 @@ const TITLES = [
 /* Hedef yalnızca bir üst basamak veya yatay geçiş olabilir; mevcut rolün kendisi/altı ve kendi alanına yatay geçiş çıkmaz */
 const eligible=(t,title)=>{
   if(t.id==="senior") return title.s===0;
-  if(t.id==="toapp") return title.f!=="app";
-  if(t.id==="tofield") return title.f!=="field";
   return true;
 };
 const YEARS = [
@@ -195,9 +194,7 @@ const TARGETS = [
   {id:"lead", n:"Takım Lideri / Teknik Lider", type:"vertical", req:[4,75,75,65]},
   {id:"mgr", n:"Manager (Servis / Destek Müdürü)", type:"vertical", req:[4,65,80,85]},
   {id:"trainer", n:"Teknik Eğitmen / Trainer", type:"lateral", req:[4,75,85,55]},
-  {id:"prod", n:"Ürün / Çözüm Uzmanı (Product Specialist)", type:"lateral", req:[4,75,75,70]},
-  {id:"toapp", n:"Aplikasyon Uzmanı (yatay geçiş)", type:"lateral", req:[3,70,75,50]},
-  {id:"tofield", n:"Saha Servis Mühendisi (yatay geçiş)", type:"lateral", req:[3,75,65,45]}
+  {id:"prod", n:"Ürün / Çözüm Uzmanı (Product Specialist)", type:"lateral", req:[4,75,75,70]}
 ];
 const ANCHORS = {
   TF:"Teknik / Fonksiyonel Yetkinlik", GM:"Genel Yönetim", AU:"Özerklik / Bağımsızlık", SE:"Güvenlik / İstikrar",
@@ -395,6 +392,7 @@ SCENES.push(`<circle cx="60" cy="20" r="54" fill="#fff" opacity=".12"/><circle c
   <path d="M520 28l24 8v16c0 14-10 22-24 26-14-4-24-12-24-26V36z" transform="translate(32 -4) scale(.9)" opacity=".95"/></g>
   <path d="M547 42l7 7 12-14" fill="none" stroke="#0e8a8c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`);
 ICONS.brief='<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>';
+ICONS.up='<path d="M12 19V5M5 12l7-7 7 7"/>';
 ICONS.coin='<circle cx="12" cy="12" r="9"/><path d="M12 6.5v11M9 9.5c.6-1.6 5.4-1.6 6 0 .5 1.7-6 1.6-6 3.4 0 1.7 5.4 1.7 6 0"/>';
 // sahne 6: terazi, madeni para ve kupa (motivasyon soruları)
 SCENES.push(`<circle cx="70" cy="90" r="54" fill="#fff" opacity=".12"/><circle cx="270" cy="8" r="42" fill="#fff" opacity=".12"/>
@@ -966,6 +964,51 @@ function motivationSection(R){
   </div>`;
 }
 
+/* ============ YÖNETİCİ ADAYLIĞINA HAZIRLIK ============ */
+const MGR_ACTIONS={
+  tech:"Yönetici olmak için ekibin en derin uzmanı olmanız gerekmez, ancak ekibin teknik güvenini kazanmanız gerekir. Zor vakalarda sistematik kök neden analizi yapıp dokümante edin, platform sertifikalarınızı tamamlayın ve ekibe teknik bir konuyu anlatın.",
+  human:"Bir junior çalışana resmi mentorluk yapın, ekip toplantısının bir bölümünü yönetin, yapıcı geri bildirim verme ve zor bir görüşmeyi yönetme pratiği için çatışma yönetimi eğitimi alın.",
+  conc:"Ekibiniz veya bölgeniz için ölçülebilir bir iyileştirme projesi (ilk seferde çözüm oranı, MTTR) yürütün; kapasite ve yedek parça planlamasında rol alın, kalite ve ürün ekipleriyle çapraz çalışın.",
+  dreyfus:"Standart prosedürün ötesinde karar verdiğiniz durumları artırın. Belirsiz arızalarda kararınızı ve gerekçenizi yazılı hale getirip ekibe aktarın; bağlamı okuyarak karar verme, yönetici rolünün temel gereğidir."
+};
+function managerReadiness(R){
+  const t0=R.target.t, userVertical=t0.type==="vertical";
+  if(!userVertical && R.anc.GM<3) return "";          // dikey yola ilgisi belirgin değilse gösterme
+  const ref = userVertical ? t0 : TARGETS.find(x=>x.id==="lead");
+  const [rd,rt,rh,rc]=ref.req, p=R.prof;
+  const dims=[
+    {k:"tech",n:"Teknik beceri",v:p.tech,r:rt,tol:8},
+    {k:"human",n:"Beşeri beceri (iletişim)",v:p.human,r:rh,tol:8},
+    {k:"conc",n:"Kavramsal beceri (liderlik)",v:p.conc,r:rc,tol:8},
+    {k:"dreyfus",n:"Dreyfus uzmanlık seviyesi",v:p.dreyfus,r:rd,tol:0.5,scale:10}
+  ].map(d=>({...d,gap:Math.max(0,(d.r-d.v)*(d.scale||1)), ok:d.v>=d.r-d.tol}));
+  const open=dims.filter(d=>!d.ok).sort((a,b)=>b.gap-a.gap);
+  const total=dims.reduce((a,d)=>a+d.gap,0);
+  const attain=Math.round(dims.reduce((a,d)=>a+Math.min(1,d.v/d.r),0)/dims.length*100);
+  const status = open.length===0
+    ? {t:"Hazırsınız",c:"good",m:"Dikey yol için gereken beceri eşiklerini karşılıyorsunuz. Sıradaki adım, yöneticinizle aday olma niyetinizi konuşmak ve vekâleten sorumluluk almak."}
+    : total<=20 ? {t:"Hazırlığa yakınsınız",c:"warn",m:"Birkaç belirli alanda küçük açıklarınız var. Hedefli gelişimle kısa sürede kapanabilir."}
+    : {t:"Henüz hazır değilsiniz",c:"warn",m:"Bu bir engel değil, bir plandır. Önce aşağıdaki boşlukları kapatın, ardından yönetici adaylığına başvurun."};
+  const months = open.length===0?"hemen":total<=12?"yaklaşık 6 ay":total<=30?"9–12 ay":total<=55?"12–18 ay":"18–24 ay ve üzeri";
+  return `<div class="sec c8">
+    <h3>${ico("up")}Yönetici Adaylığına Hazırlık${userVertical?"":" · Dikey yola ilerlemek isterseniz"}</h3>
+    <p style="margin:0 0 8px">Referans rol: <strong>${esc(ref.n)}</strong> · Hazırlık düzeyi: <span class="chip ${status.c}">${status.t} · %${attain}</span></p>
+    <p style="margin:0 0 10px">${status.m}</p>
+    ${dims.map(d=>`<div class="bar"><div class="l"><span>${d.n} ${d.ok?'<span class="chip good" style="margin:0 0 0 4px">Karşılıyor</span>':'<span class="chip warn" style="margin:0 0 0 4px">Boşluk</span>'}</span><span>${d.k==="dreyfus"?d.v.toFixed(1):Math.round(d.v)} / hedef ${d.r}</span></div><div class="t"><b style="width:${d.k==="dreyfus"?d.v/5*100:Math.round(d.v)}%"></b><u style="left:${d.k==="dreyfus"?d.r/5*100:d.r}%"></u></div></div>`).join("")}
+    ${open.length?`<p style="margin:14px 0 4px"><strong>Önce kapatılması gereken boşluklar (en büyükten başlayarak):</strong></p>
+    <ol style="margin:0;padding-left:20px;font-size:14px">${open.map(d=>`<li style="margin-bottom:8px"><strong>${d.n}</strong>${d.k==="dreyfus"?"":` (${Math.round(d.r-d.v)} puan geride)`}: ${MGR_ACTIONS[d.k]}</li>`).join("")}</ol>
+    <p style="margin:10px 0 0"><strong>Kaba süre tahmini:</strong> ${months}. Bu, puanlardaki toplam fark üzerinden yapılmış genel bir tahmindir; gerçek süre fırsatlara ve yöneticinizin desteğine bağlıdır.</p>`:""}
+    <p style="margin:14px 0 4px"><strong>Hazır olduğunuzu nasıl anlarsınız?</strong></p>
+    <ul style="margin:0;padding-left:20px;font-size:14px">
+      <li>Teknik, beşeri ve kavramsal becerinizin her biri hedefin en fazla 8 puan altında veya üstünde.</li>
+      <li>Dreyfus seviyeniz en az ${(rd-0.5).toFixed(1)}.</li>
+      <li>En az bir ölçülebilir iyileştirme projesi veya vekâleten liderlik deneyiminiz var.</li>
+      <li>Yöneticiniz sizi ekip lideri adayı olarak görüyor ve bunu yazılı geri bildirimle teyit edebiliyor.</li>
+    </ul>
+    ${userVertical?"":`<p class="hint">Not: Şu anki profilinize en uygun hedef <strong>${esc(t0.n)}</strong> olarak önerildi. Dikey yol buna paralel veya sonrası için bir seçenek olarak durabilir.</p>`}
+  </div>`;
+}
+
 function renderReport(){
   setStep(3);
   const R=compute(), p=R.prof, t=R.target.t, fit=R.target.fit;
@@ -1065,6 +1108,8 @@ function renderReport(){
       </div>
       <p class="note">Bu rapor durumsal sorulara dayalı bir öz değerlendirmedir; Dreyfus, Katz ve Schein modellerinin basitleştirilmiş bir uygulamasıdır. Psikometrik bir test veya performans değerlendirmesi yerine geçmez; yöneticiniz ve İK ile yapacağınız kariyer görüşmesi için bir başlangıç noktası olarak kullanın.</p>
     </div>
+
+    ${managerReadiness(R)}
 
     ${!S.wantDisc ? `<div class="sec c6 no-print"><h3>${ico("brief")}Farklı disiplinlerde kariyer</h3>
       <p style="margin:0 0 10px">Disiplin keşfi bölümünü atladınız. İsterseniz satış, pazarlama, tedarik zinciri ve kalite alanlarına uygunluğunuzu şimdi ölçebilirsiniz; sonuç bu rapora eklenir.</p>
