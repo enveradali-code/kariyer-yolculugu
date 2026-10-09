@@ -267,11 +267,25 @@ const QUESTIONS = [
    }},
  { tag:"Beşeri Beceriler · Katz",
    scenario(ctx){
+     if(ctx.family==="work") return ctx.q1.d>=4
+      ? "Çözümü bulduktan sonra, daha deneyimsiz bir meslektaşınızın aynı arızada yanlış tanı koyduğunu ve modülü hatalı bir onarım notuyla sahaya gönderdiğini öğreniyorsunuz. Nasıl yaklaşırsınız?"
+      : "Saha servis mühendisi, modülün onarım süresinin uzamasından dolayı sinirli ve sizi sorumlu tutuyor. Nasıl iletişim kurarsınız?";
      return ctx.q1.d>=4
       ? "Çözümü bulduktan sonra, daha deneyimsiz bir meslektaşınızın aynı konuda müşteriye yanlış bilgi verdiğini öğreniyorsunuz. Nasıl yaklaşırsınız?"
       : "Laboratuvar şefi çözüm süresinin uzamasından dolayı sinirli ve sizi sorumlu tutuyor. Nasıl iletişim kurarsınız?";
    },
    options(ctx){
+     if(ctx.family==="work") return ctx.q1.d>=4 ? [
+       O("Modülü sahadan geri çağırıp doğru onarımı hızla yapar, ardından meslektaşımla suçlamadan, birebir oturup nedenini birlikte analiz ederim.",4,2,4,2,{SV:1,GM:1}),
+       O("Düzeltmeyi kendim yapar, meslektaşıma kısa bir e-postayla doğru bilgiyi iletirim.",3,2,2,1,{AU:1,TF:1}),
+       O("Durumu yöneticime bildirir ve onun müdahalesini beklerim.",2,1,1,0,{SE:2}),
+       O("Atölye ekibi için bir vaka çalışması ve kısa eğitim hazırlar, onarım notu için bir şablon önerir, ayrıca meslektaşıma düzenli koçluk yaparım.",5,3,4,4,{GM:2,SV:1})
+     ] : [
+       O("Sakin kalır, durumu ve çözüm planını net zaman çizelgesiyle anlatır, düzenli ara bilgilendirme yaparım.",4,2,4,2,{SV:1}),
+       O("Sorunun benden kaynaklanmadığı anlaşılsın diye teknik detayları ayrıntılı biçimde açıklarım.",2,2,1,0,{TF:1}),
+       O("Konuyu hemen yöneticime devrederim.",1,0,1,0,{SE:2}),
+       O("Empati kurar, geçici çözüm seçeneklerini (yedek modül, öncelikli işlem) birlikte belirler, süreci yazılı kayıt altına alırım.",4,2,4,3,{SV:1,GM:1})
+     ];
      return ctx.q1.d>=4 ? [
        O("Müşteriye düzeltmeyi hızla yapar, ardından meslektaşımla suçlamadan, birebir oturup nedenini birlikte analiz ederim.",4,2,4,2,{SV:1,GM:1}),
        O("Düzeltmeyi kendim yapar, meslektaşıma kısa bir e-postayla doğru bilgiyi iletirim.",3,2,2,1,{AU:1,TF:1}),
@@ -286,6 +300,9 @@ const QUESTIONS = [
    }},
  { tag:"Kavramsal / Stratejik Beceriler · Katz",
    scenario(ctx){
+     if(ctx.family==="work") return ctx.vertical
+      ? "Atölyeye gelen arızalı modül sayısı son 6 ayda %20 arttı; ekip ve yedek parça kapasitesi sınırlı. Yönetim sizden bir iyileştirme önerisi bekliyor."
+      : "Şirket yeni bir cihaz/test platformunu pazara sunuyor. Ürün ekibi, atölyede gördüğünüz tekrarlayan arıza nedenleri ve saha ekiplerinin gerçek ihtiyaçları hakkında sizden destek istiyor.";
      return ctx.vertical
       ? "Bölgenizde tekrarlayan arıza/çağrı sayısı son 6 ayda %20 arttı; ekip ve yedek parça kapasitesi sınırlı. Yönetim sizden bir iyileştirme önerisi bekliyor."
       : "Şirket yeni bir cihaz/test platformunu pazara sunuyor. Ürün ekibi sahadaki ve laboratuvarlardaki gerçek ihtiyaçları öğrenmek için sizden destek istiyor.";
@@ -297,7 +314,9 @@ const QUESTIONS = [
        O("Ekibin görüşlerini alıp ortak bir yol haritası çıkarır; kalite ve ürün ekipleriyle kalıcı bir geri bildirim kanalı kurulmasını öneririm.",4,2,4,4,{GM:2,SV:1}),
        O("Öneri geliştirmek benim görevim değil; teknik işimi iyi yapmaya odaklanırım.",3,2,0,0,{TF:1,AU:1})
      ] : [
-       O("Saha deneyimimden tipik sorunları ve müşteri beklentilerini yapılandırılmış bir geri bildirim raporuna dönüştürür, pilot müşterilerde doğrulamayı öneririm.",4,3,3,4,{EC:1,CH:1,TF:1}),
+       O(ctx.family==="work"
+          ? "Atölye deneyimimden tipik arıza nedenlerini ve onarım zorluklarını yapılandırılmış bir geri bildirim raporuna dönüştürür, pilot cihazlarda doğrulamayı öneririm."
+          : "Saha deneyimimden tipik sorunları ve müşteri beklentilerini yapılandırılmış bir geri bildirim raporuna dönüştürür, pilot müşterilerde doğrulamayı öneririm.",4,3,3,4,{EC:1,CH:1,TF:1}),
        O("Gerekirse katılırım ama asıl işimden ödün vermemek şartıyla.",3,1,1,1,{SE:1,LS:1}),
        O("Gönüllü olurum; yeni ürünü hızla öğrenip ilk eğitimleri vermeyi teklif ederim.",4,3,4,3,{SV:1,CH:1,EC:1}),
        O("Ürün ekibi bu konuda yetkin; benim katkıma gerek olduğunu düşünmüyorum.",2,0,0,0,{SE:1})
