@@ -222,6 +222,11 @@ const TARGETS = [
   {id:"prod", n:"Ürün / Çözüm Uzmanı (Product Specialist)", type:"lateral", req:[4,75,75,70]},
   {id:"tofield", n:"Saha Servis Mühendisi (atölyeden sahaya geçiş)", type:"lateral", req:[3,75,65,45]}
 ];
+// Tüm bölümlerde (boşluk analizi, hazırlık, öneri) aynı tolerans: beceri boyutları 8 puan, Dreyfus 0,5 seviye
+const TOL={dim:8,dreyfus:0.5};
+// Önerilen hedefin uyumu bu eşiğin altındaysa "hedef önermek için erken" mesajı gösterilir
+const LOW_FIT=50;
+const reqSum=t=>t.req.reduce((a,b)=>a+b,0);
 // "Kıdemli" hedefin adı kişinin kendi alanına göre belirlenir
 const SENIOR_NAME={field:"Kıdemli Saha Servis Mühendisi (Teknik Referans)", app:"Kıdemli Aplikasyon Uzmanı (Teknik Referans)", work:"Kıdemli Atölye Destek Teknisyeni / Uzmanı (Teknik Referans)"};
 const applyFamily=f=>{ const s=TARGETS.find(x=>x.id==="senior"); if(SENIOR_NAME[f]) s.n=SENIOR_NAME[f]; };
@@ -300,6 +305,7 @@ const QUESTIONS = [
    }},
  { tag:"Kavramsal / Stratejik Beceriler · Katz",
    scenario(ctx){
+     if(ctx.family==="app"&&ctx.vertical) return "Bölgenizdeki laboratuvarlarda test performansı sapmaları ve uygulama destek talepleri son 6 ayda %20 arttı; ekip kapasitesi sınırlı. Yönetim sizden bir iyileştirme önerisi bekliyor.";
      if(ctx.family==="work") return ctx.vertical
       ? "Atölyeye gelen arızalı modül sayısı son 6 ayda %20 arttı; ekip ve yedek parça kapasitesi sınırlı. Yönetim sizden bir iyileştirme önerisi bekliyor."
       : "Şirket yeni bir cihaz/test platformunu pazara sunuyor. Ürün ekibi, atölyede gördüğünüz tekrarlayan arıza nedenleri ve saha ekiplerinin gerçek ihtiyaçları hakkında sizden destek istiyor.";
@@ -310,7 +316,7 @@ const QUESTIONS = [
    options(ctx){
      return ctx.vertical ? [
        O("Verileri toplar, Pareto analiziyle en sık 3 nedeni belirler; öncelikli aksiyon planı ve beklenen etkiyi (ör. ilk seferde çözüm oranı) sunarım.",4,3,2,4,{GM:2,TF:1}),
-       O("Daha fazla personel ve yedek parça bütçesi talep ederim.",2,0,1,1,{SE:1}),
+       O(ctx.family==="app"?"Daha fazla personel ve eğitim bütçesi talep ederim.":"Daha fazla personel ve yedek parça bütçesi talep ederim.",2,0,1,1,{SE:1}),
        O("Ekibin görüşlerini alıp ortak bir yol haritası çıkarır; kalite ve ürün ekipleriyle kalıcı bir geri bildirim kanalı kurulmasını öneririm.",4,2,4,4,{GM:2,SV:1}),
        O("Öneri geliştirmek benim görevim değil; teknik işimi iyi yapmaya odaklanırım.",3,2,0,0,{TF:1,AU:1})
      ] : [
@@ -632,6 +638,7 @@ function renderIntro(){
 
     <label for="years">2. Kaç yıldır bu roldesiniz?</label>
     <select id="years"><option value="">Seçiniz…</option>${YEARS.map((y,i)=>`<option value="${i}">${y.v}</option>`).join("")}</select>
+    <div class="hint" id="yhint" style="color:var(--warn)" role="status"></div>
 
     <label for="target">3. Hedeflediğiniz bir sonraki pozisyon nedir?</label>
     <select id="target"></select>
@@ -656,8 +663,17 @@ function renderIntro(){
   };
   nName.value=S.name; nTitle.value=S.titleIdx; nYears.value=S.yearsIdx;
   fillTargets(S.targetNone ? "none" : S.targetId); chk();
-  nTitle.addEventListener("change",()=>{ fillTargets(nTarget.value); chk(); });
+  // Kıdemli unvan + 1 yıldan az süre: engellenmez, yalnızca uyarı verilir
+  const ywarn=()=>{
+    const ti = nTitle.value===""?null:TITLES[nTitle.value];
+    document.getElementById("yhint").textContent = (ti && ti.s===1 && nYears.value==="0")
+      ? "Dikkat: Kıdemli bir unvan için 1 yıldan az süre seçtiniz. Devam edebilirsiniz; değerlendirme bu süreyi dikkate alır ve deneyim süresi puanınız düşük çıkabilir. Süre doğruysa bu uyarıyı yok sayabilirsiniz."
+      : "";
+  };
+  nTitle.addEventListener("change",()=>{ fillTargets(nTarget.value); chk(); ywarn(); });
   [nYears,nTarget].forEach(e=>e.addEventListener("change",chk));
+  nYears.addEventListener("change",ywarn);
+  ywarn();
   $go.addEventListener("click",()=>{
     S.name=nName.value.trim(); S.titleIdx=nTitle.value; S.yearsIdx=nYears.value;
     S.targetNone = nTarget.value==="none";
@@ -896,33 +912,38 @@ function compute(){
     Object.entries(o.a).forEach(([k,v])=>anc[k]+=v);
   });
   const yearsLevel = years<1?1: years<3?2: years<6?3: years<10?4:4.5;
-  const dreyfus = Math.min(5, Math.max(1, 0.7*(sumD/nD)+0.3*yearsLevel));
-  const tech = Math.min(100, (T/mT)*88 + Math.min(years,10)*1.2);
+  // Unvan kıdemi bir ön-kabul olarak katılır (cevapların yerini almaz): Dreyfus'ta %20, teknik beceride +4 puan.
+  // Kıdemli unvan daha önce değerlendirilmiş yetkinliğin göstergesi sayılır; standart unvan için ön-kabul 3,0 (Yetkin).
+  const senior = !!TITLES[S.titleIdx].s;
+  const dreyfus = Math.min(5, Math.max(1, 0.6*(sumD/nD)+0.2*yearsLevel+0.2*(senior?4.2:3.0)));
+  const tech = Math.min(100, (T/mT)*88 + Math.min(years,10)*1.2 + (senior?4:0));
   const human = Math.min(100, (H/mH)*100);
   const conc = Math.min(100, (C/mC)*100);
   const prof={dreyfus,tech,human,conc};
 
-  const fit=(t)=>{
+  // ham uyum (sınırsız) sıralama için, gösterilen uyum 5–98 arasına sıkıştırılır; böylece taban/tavan eşitlikleri sıralamayı bozmaz
+  const fitRaw=(t)=>{
     const [rd,rt,rh,rc]=t.req;
     let f=100 - Math.max(0,rd-dreyfus)*10 - 0.4*(Math.max(0,rt-tech)+Math.max(0,rh-human)+Math.max(0,rc-conc));
     const pref = t.type==="vertical"?anc.GM : t.type==="expert"?anc.TF+anc.CH : anc.SV+anc.EC+anc.AU;
-    f += Math.min(5,pref)-2.5; // çıpa uyumu: -2.5..+2.5
-    return Math.max(5,Math.min(98,Math.round(f)));
+    return f + Math.min(5,pref)-2.5; // çıpa uyumu: -2.5..+2.5
   };
-  const scored=TARGETS.filter(t=>eligible(t,TITLES[S.titleIdx])).map(t=>({t,fit:fit(t)})).sort((a,b)=>b.fit-a.fit);
+  const fit=(t)=>Math.max(5,Math.min(98,Math.round(fitRaw(t))));
+  const scored=TARGETS.filter(t=>eligible(t,TITLES[S.titleIdx])).map(t=>({t,fit:fit(t),raw:fitRaw(t)})).sort((a,b)=>(b.raw-a.raw)||(reqSum(b.t)-reqSum(a.t)));   // eşit ham skorda daha yüksek beklentili rol öne
   const suggested=!S.targetId;
   // öneri modunda dikey yükselişe öncelik: sıralamaya +25 puan (gösterilen uyum skoru değişmez).
   // Bonus yalnızca profil o role gerçekten yakınsa verilir: Dreyfus en fazla 0,5 seviye, her beceri
   // boyutu en fazla 8 puan geride ve toplam uyum en az %60. Aksi halde hazır olmayan birini yönetici rolüne yönlendirmiş oluruz.
   const VERTICAL_BONUS=25, VERTICAL_MIN_FIT=60;
-  const ready=t=>{ const [rd,rt,rh,rc]=t.req; return dreyfus>=rd-0.5 && tech>=rt-8 && human>=rh-8 && conc>=rc-8; };
+  const ready=t=>{ const [rd,rt,rh,rc]=t.req; return dreyfus>=rd-TOL.dreyfus && tech>=rt-TOL.dim && human>=rh-TOL.dim && conc>=rc-TOL.dim; };
   // Atölye çalışanının doğal kariyer yolu saha servistir: uyum en az %50 ise öneride öncelik alır
   const FIELD_MOVE_BONUS=40, FIELD_MOVE_MIN_FIT=50;
-  const rank=x=>x.fit
+  const rank=x=>x.raw
     +(x.t.type==="vertical"&&x.fit>=VERTICAL_MIN_FIT&&ready(x.t)?VERTICAL_BONUS:0)
     +(x.t.id==="tofield"&&x.fit>=FIELD_MOVE_MIN_FIT?FIELD_MOVE_BONUS:0);
-  const pick=()=>[...scored].sort((a,b)=>rank(b)-rank(a))[0];
+  const pick=()=>[...scored].sort((a,b)=>(rank(b)-rank(a))||(reqSum(b.t)-reqSum(a.t)))[0];
   const target = suggested ? pick() : scored.find(x=>x.t.id===S.targetId);
+  const lowFit = suggested && target.fit<LOW_FIT;   // en iyi seçenek bile zayıf: hedef önermek yerine gelişim odağı verilir
 
   const V=Math.max(0.5, anc.GM*2 + (conc-50)/10 + (human-50)/15);
   const E=Math.max(0.5, (anc.TF+anc.CH*0.5)*2 + (tech-50)/10);
@@ -933,11 +954,11 @@ function compute(){
   const sum=V*vBoost+E+L;
   const routes=[
     {id:"vertical",n:"Dikey Yükselme (Yöneticilik)",s:V*vBoost/sum},
-    {id:"expert",n:"Derin Uzmanlık (Kıdemli Uzman / Teknik Referans)",s:E/sum},
+    {id:"expert",n:"Derin Uzmanlık (Teknik Referans)",s:E/sum},
     {id:"lateral",n:"Yatay Geçiş (Farklı departman / rol)",s:L/sum}
   ].sort((a,b)=>b.s-a.s);
 
-  return {family,years,prof,anc,scored,target,suggested,routes};
+  return {family,years,prof,anc,scored,target,suggested,lowFit,routes};
 }
 
 /* ============ RAPOR ============ */
@@ -980,12 +1001,20 @@ const PHASES = {
  expert:[
   ["0–6 ay · Derinleşme",["En kritik platform/modülde ileri seviye sertifikasyon hedefleyin","Zor vakaları dokümante edip bilgi tabanına ekleyin","Üretici/ürün destek ekipleriyle doğrudan çalışma ilişkisi kurun"]],
   ["6–12 ay · Görünürlük",["Ekip içi teknik eğitimler verin, 'ilk başvurulan kişi' olun","Yeni ürün lansmanlarında pilot/doğrulama rolü alın","Kök neden analizi standartlarını ekip adına siz oluşturun"]],
-  ["12–24 ay · Referans",["Kıdemli Uzman / SME unvanı için dosya hazırlayın","Bölgeler arası eskalasyon noktası olun","Regülasyon/kalite bilginizi (IVDR, ISO 13485) teknik uzmanlığınızla birleştirin"]]],
+  ["12–24 ay · Referans",["Kıdemli uzman unvanı için dosya hazırlayın","Bölgeler arası eskalasyon noktası olun","Regülasyon/kalite bilginizi (IVDR, ISO 13485) teknik uzmanlığınızla birleştirin"]]],
  lateral:[
   ["0–6 ay · Keşif",["Hedef departmandan bir kişiyle gölgeleme (job shadowing) yapın","Hedef rolün yetkinlik matrisini isteyin ve eksiklerinizi çıkarın","Ortak bir proje/vaka ile görünürlük kazanın"]],
   ["6–12 ay · Hazırlık",["Hedef rol için gerekli platform, uygulama veya eğitmen sertifikalarını tamamlayın","Kısa süreli rotasyon veya geçici görevlendirme talep edin","Mevcut rolünüzdeki bilgiyi dokümante ederek devre hazır hale getirin"]],
   ["12–24 ay · Geçiş",["Resmi rol geçişi ve ilk 90 gün planı","Eski ekiple 'köprü' rolü (saha-aplikasyon-atölye bilgi aktarımı)","Yeni rolde ilk 6 ay için başarı ölçütlerini yöneticinizle yazılı belirleyin"]]]
 };
+PHASES.trainer=[
+  ["0–6 ay · Keşif",["Bir iç eğitime yardımcı eğitmen olarak katılın ve eğitim akışını gözlemleyin","Eğitim materyali (sunum, uygulama föyü) hazırlamada rol alın","Eğitmen yetkinlik beklentilerini eğitim ekibinden ve yöneticinizden öğrenin"]],
+  ["6–12 ay · Hazırlık",["Eğitmen eğitimi, sunum ve eğitim tasarımı konusunda eğitim alın","Bir iç ekip veya müşteri eğitimini deneyimli bir eğitmenle birlikte verin","Katılımcı geri bildirimi toplayıp içeriği iyileştirin"]],
+  ["12–24 ay · Geçiş",["Bağımsız eğitim oturumları verin","Bir platform için eğitim müfredatı veya içerik sorumluluğu alın","Eğitmen rolü için kriterleri yöneticinizle yazılı olarak belirleyin"]]];
+PHASES.prod=[
+  ["0–6 ay · Keşif",["Ürün ekibiyle ortak bir pilot veya proje yürütün, saha ile ürün arasında köprü olun","Sahadan gelen ihtiyaçları yapılandırılmış raporlayın","Ürün/çözüm uzmanı yetkinlik matrisini isteyip eksiklerinizi çıkarın"]],
+  ["6–12 ay · Hazırlık",["Ürün bilgisi, pazar ve rakip analizi konusunda eğitim alın","Bir lansman veya pilotta geçici görev talep edin","Müşteri değer önerisi ve sunum becerinizi geliştirin"]],
+  ["12–24 ay · Geçiş",["Resmi rol geçişi ve ilk 90 gün planı","Saha deneyiminizi ürün ekibine aktaran bir 'köprü' rolü üstlenin","Yeni rolde ilk 6 ay için başarı ölçütlerini yöneticinizle yazılı belirleyin"]]];
 PHASES.toField=[
   ["0–6 ay · Keşif",["Saha servis ekibiyle ride-along (sahaya eşlik) yapın, 2–3 müşteri ziyaretine katılın","Atölyede gördüğünüz arızaların sahadaki karşılığını ve müşteriye etkisini öğrenin","Saha mühendisi yetkinlik matrisini isteyin ve eksiklerinizi çıkarın"]],
   ["6–12 ay · Hazırlık",["Hedef platform için saha servis eğitim ve sertifikalarını tamamlayın","Müşteri iletişimi, zor görüşme yönetimi, seyahat ve saha güvenliği kurallarını öğrenin","Kısa süreli saha rotasyonu veya geçici görevlendirme talep edin"]],
@@ -1031,7 +1060,8 @@ function motivationSection(R){
     if(t.type==="vertical") link = p.conc<t.req[3]
       ? `Hedefiniz (${esc(t.n)}) gelir ve unvan beklentinizi destekleyen bir yol; ancak kavramsal beceri puanınız ${Math.round(p.conc)}, hedef ise ${t.req[3]}. Bu boşluğu kapatmadan geçiş zor olabilir.`
       : `Hedefiniz (${esc(t.n)}) gelir ve unvan beklentinizle örtüşüyor ve beceri profiliniz bu yola uygun görünüyor.`;
-    else link=`Hedefiniz (${esc(t.n)}) yönetici olmayan bir yol. Unvan ve gelir sizin için önemliyse, Kıdemli Uzman / Teknik Referans basamaklarının unvan ve gelir karşılığını İK ile netleştirin; bu bilgi kuruma özgüdür.`;
+    else if(t.type==="expert") link=`Hedefiniz (${esc(t.n)}) yönetici olmayan bir uzmanlık yolu. Unvan ve gelir sizin için önemliyse, bu basamağın unvan ve gelir karşılığını İK ile netleştirin; bu bilgi kuruma özgüdür.`;
+    else link=`Hedefiniz (${esc(t.n)}) farklı bir role geçiştir. Unvan ve gelir sizin için önemliyse, bu rolün gelir ve unvan basamaklarını mevcut rolünüzle kıyaslayarak İK ile netleştirin; geçişin ilk döneminde gelir ve unvan değişmeyebilir.`;
     if(M.payTitle==="title") link+=" Not: unvan (statü) gelirden daha ağır basıyor; bu durumda rolün unvan basamaklarını ve terfi kriterlerini öğrenmek öncelikli olabilir.";
     if(M.payTitle==="pay") link+=" Not: gelir unvandan daha ağır basıyor; bu durumda hangi rolün hangi gelir basamağına denk geldiğini öğrenmek öncelikli olabilir.";
   } else if(t.type==="vertical"){
@@ -1039,6 +1069,8 @@ function motivationSection(R){
                 auto:"yönetici rolünde takviminiz ve önceliklerinizin büyük kısmı başkalarının ihtiyaçlarıyla belirlenir; özerklik ve denge çoğu zaman azalır",
                 sec:"yönetici rolünde sorumluluk ve belirsizlik artar; öngörülebilirlik çoğu zaman azalır"}[M.top];
     link=`Hedefiniz (${esc(t.n)}) yönetici yoluna işaret ediyor, ancak ana motivasyonunuz "${top.n}". Dikkat: ${loss}. Karar vermeden önce bu rolde çalışan biriyle bir iş gününü birlikte geçirmenizi öneririm.`;
+  } else if(M.top==="auto" && t.id==="tofield"){
+    link=`Hedefiniz (${esc(t.n)}) ana motivasyonunuz olan "${top.n}" ile kısmen çelişebilir: saha servis rolü seyahat, müşteri randevularına bağlı çalışma ve gerektiğinde nöbet içerebilir; esnek mesai ve öngörülebilir iş yükü sınırlı olabilir. Karar vermeden önce bir saha mühendisinin tipik haftasını ve nöbet düzenini öğrenmenizi öneririm.`;
   } else if(M.top==="sec" && t.type==="lateral"){
     link=`Hedefiniz (${esc(t.n)}) bir yatay geçiş ve geçiş döneminde geçici belirsizlik olur. Güvence sizin için önemli olduğundan ani geçiş yerine gölgeleme ve rotasyonla kademeli ilerleyin.`;
   } else {
@@ -1079,10 +1111,10 @@ function managerReadiness(R){
   const ref = userVertical ? t0 : TARGETS.find(x=>x.id==="lead");
   const [rd,rt,rh,rc]=ref.req, p=R.prof;
   const dims=[
-    {k:"tech",n:"Teknik beceri",v:p.tech,r:rt,tol:8},
-    {k:"human",n:"Beşeri beceri (iletişim)",v:p.human,r:rh,tol:8},
-    {k:"conc",n:"Kavramsal beceri (liderlik)",v:p.conc,r:rc,tol:8},
-    {k:"dreyfus",n:"Dreyfus uzmanlık seviyesi",v:p.dreyfus,r:rd,tol:0.5,scale:10}
+    {k:"tech",n:"Teknik beceri",v:p.tech,r:rt,tol:TOL.dim},
+    {k:"human",n:"Beşeri beceri (iletişim)",v:p.human,r:rh,tol:TOL.dim},
+    {k:"conc",n:"Kavramsal beceri (liderlik)",v:p.conc,r:rc,tol:TOL.dim},
+    {k:"dreyfus",n:"Dreyfus uzmanlık seviyesi",v:p.dreyfus,r:rd,tol:TOL.dreyfus,scale:10}
   ].map(d=>({...d,gap:Math.max(0,(d.r-d.v)*(d.scale||1)), ok:d.v>=d.r-d.tol}));
   const open=dims.filter(d=>!d.ok).sort((a,b)=>b.gap-a.gap);
   const total=dims.reduce((a,d)=>a+d.gap,0);
@@ -1119,19 +1151,21 @@ function renderReport(){
   DISCS.forEach(d=>{ const e=Object.entries(d.parts).sort((a,b)=>a[1]-b[1])[0]; d.weakest = e[1]<60 ? WEAK[e[0]] : ""; });
   const topAnc=Object.entries(R.anc).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>0).slice(0,3);
   const maxA=Math.max(1,...topAnc.map(x=>x[1]));
-  const lvl=Math.round(p.dreyfus);
+  const lvl=Math.max(1,Math.min(5,Math.round(p.dreyfus)));   // yuvarlama eşiği (x,5) boşluk toleransı TOL.dreyfus=0,5 ile aynı: 3,5 ve üstü hedef 4'ü karşılar ve "Usta" sayılır
   const [rd,rt,rh,rc]=t.req;
   const rows=[
     ["Teknik Beceri",p.tech,rt,"tech"],["Beşeri Beceri (İletişim)",p.human,rh,"human"],["Kavramsal Beceri (Liderlik)",p.conc,rc,"conc"]
   ];
   const strengths=[], gaps=[];
-  rows.forEach(([n,v,r,k])=>{ (v>=r-5?strengths:gaps).push({n,v:Math.round(v),r,k}); });
-  (p.dreyfus>=rd-0.3?strengths:gaps).push({n:"Dreyfus Uzmanlık Seviyesi",v:p.dreyfus.toFixed(1),r:rd,k:"dreyfus"});
+  rows.forEach(([n,v,r,k])=>{ (v>=r-TOL.dim?strengths:gaps).push({n,v:Math.round(v),r,k}); });
+  (p.dreyfus>=rd-TOL.dreyfus?strengths:gaps).push({n:"Dreyfus Uzmanlık Seviyesi",v:p.dreyfus.toFixed(1),r:rd,k:"dreyfus"});
 
   const top=R.routes[0], title=TITLES[S.titleIdx].v;
-  const routeBlock=(r,rec)=>`<div class="route ${rec?"rec":""}"><h4>${esc(r.n)} ${rec?'<span class="chip" style="margin-left:6px">Önerilen</span>':""}</h4>
+  // Rota kartları hedefin türüyle tutarlı: hedefin rotası "Hedefinize uygun", çıpalara en yatkın rota ayrıca etiketlenir
+  const routeBlock=(r)=>{ const tag = r.id===t.type ? "Hedefinize uygun" : (r.id===top.id ? "Çıpalarınıza en yatkın" : ""); const rec=r.id===t.type;
+    return `<div class="route ${rec?"rec":""}"><h4>${esc(r.n)} ${tag?`<span class="chip" style="margin-left:6px">${tag}</span>`:""}</h4>
      <div class="bar"><div class="t"><b style="width:${Math.round(r.s*100)}%"></b></div></div>
-     <div class="hint">Profil yatkınlığı: %${Math.round(r.s*100)}</div></div>`;
+     <div class="hint">Profil yatkınlığı: %${Math.round(r.s*100)}</div></div>`; };
 
   let mismatch="";
   if(!R.suggested && t.type!==top.id){
@@ -1141,11 +1175,20 @@ function renderReport(){
   if(R.suggested && t.type==="vertical" && fit<70){
     mismatch+=`<p><strong>Not:</strong> Dikey yükselişi öncelikli tuttuğum için bu pozisyonu önerdim; mevcut uyumunuz %${fit}. Aşağıdaki 'Geliştirilmesi gereken yetkinlikler' bölümü bu farkı kapatmak için ilk odak noktanız olmalı.</p>`;
   }
-  const toField = t.id==="tofield";
-  const phases = toField ? PHASES.toField : PHASES[top.id];
-  const verdict = fit>=80?"Profiliniz hedefle büyük ölçüde örtüşüyor; kısa vadede hazır olmanızı sağlayacak küçük gelişim adımları yeterli olabilir."
+  // Yol haritası hedefin kendisine göre belirlenir (çıpalara göre seçilen rotaya göre değil)
+  const PHASE_BY_TARGET={lead:PHASES.vertical,mgr:PHASES.vertical,senior:PHASES.expert,trainer:PHASES.trainer,prod:PHASES.prod,tofield:PHASES.toField};
+  const LABEL_BY_TARGET={lead:"Proje Liderliği",mgr:"Manager rolüne",senior:"Kıdemli uzmanlık",trainer:"Eğitmenlik",prod:"Ürün / Çözüm Uzmanlığı",tofield:"Saha Servis Mühendisliğine geçiş"};
+  const phases = PHASE_BY_TARGET[t.id]||PHASES[t.type];
+  const alt = R.scored.find(x=>x.t.id!==t.id);
+  const altNote = (!R.suggested && fit<60 && alt && alt.fit>=fit+15) ? ` Daha yakın bir alternatif: <strong>${esc(alt.t.n)}</strong> (%${alt.fit}).` : "";
+  const verdict = R.lowFit ? "Mevcut profiliniz, bu rol için şu an hiçbir hedefle belirgin biçimde örtüşmüyor. Bir hedef önermek için henüz erken; önce temel yetkinliklerinizi güçlendirmenizi öneririm. Aşağıdaki en yakın seçenek bir hedef değil, gelişim planınız için bir yön göstergesidir."
+    : fit>=80?"Profiliniz hedefle büyük ölçüde örtüşüyor; kısa vadede hazır olmanızı sağlayacak küçük gelişim adımları yeterli olabilir."
     : fit>=60?"Temel uyum var; birkaç belirli yetkinlikte hedeflenmiş gelişim ile 12–18 ay içinde güçlü aday olabilirsiniz."
-    : "Hedef ile mevcut profil arasında belirgin bir fark var; bu bir engel değil, planlı bir gelişim yolculuğu gerektiriyor.";
+    : fit>=40?"Hedef ile mevcut profil arasında belirgin bir fark var; bu bir engel değil, planlı bir gelişim yolculuğu gerektiriyor."+altNote
+    : "Hedef ile mevcut profil arasında büyük bir fark var; bu hedef kısa ve orta vadede gerçekçi olmayabilir. Önce temel yetkinlikleri güçlendirip bir ara basamağı değerlendirmenizi öneririm."+altNote;
+  const seniorShortYears = TITLES[S.titleIdx].s===1 && S.yearsIdx==="0";
+  const isSenior = TITLES[S.titleIdx].s===1;
+  const seniorBelow = isSenior && p.dreyfus<3.5;   // kıdemli unvanın tipik beklentisi: en az "Usta" eşiği
 
   app.innerHTML=`
   <div class="rep" id="report">
@@ -1156,14 +1199,17 @@ function renderReport(){
       <div class="hero">
         <div>${gauge(fit)}</div>
         <div>
-          <div class="big">${R.suggested?"Size önerilen hedef pozisyon":"Hedeflenen pozisyona uyum skoru"}</div>
+          <div class="big">${R.lowFit?"Şu an hedef önermek için erken · en yakın seçenek":R.suggested?"Size önerilen hedef pozisyon":"Hedeflenen pozisyona uyum skoru"}</div>
           <h3 style="font-size:19px;margin:2px 0 8px">${esc(t.n)}</h3>
           <div>
-            <span class="chip">Dreyfus: ${DREYFUS[lvl]}</span>
+            <span class="chip">Dreyfus: ${DREYFUS[lvl]} · ${p.dreyfus.toFixed(1)}/5</span>
             ${topAnc.map(([k])=>`<span class="chip good">${esc(ANCHORS[k])}</span>`).join("")}
           </div>
           <p style="margin:6px 0 0;color:var(--muted);font-size:14px">${verdict}</p>
-          ${R.suggested?`<p class="hint">Not: Hedef belirtmediğiniz için ${R.scored.length} olası pozisyon arasından, dikey yükselişi öncelikli tutarak profilinize en uygun olanı seçtim.</p>`:""}
+          ${R.suggested&&!R.lowFit?`<p class="hint">Not: Hedef belirtmediğiniz için ${R.scored.length} olası pozisyon arasından, dikey yükselişi öncelikli tutarak profilinize en uygun olanı seçtim.</p>`:""}
+          ${isSenior?`<p class="hint">Not: Kıdemli unvanınız değerlendirmede bir ön-kabul olarak dikkate alındı (Dreyfus seviyesine ve teknik beceriye sınırlı katkı); cevaplarınızın yerine geçmez.</p>`:""}
+          ${seniorBelow?`<p class="hint" style="color:var(--warn)">Dikkat: Dreyfus seviyeniz (${p.dreyfus.toFixed(1)}), kıdemli bir unvanın tipik beklentisinin (en az 3,5) altında kaldı. Bu bir yargı değil; kıdemli rolün gerektirdiği karar verme olgunluğunu yöneticinizle konuşmak için bir başlangıç noktasıdır.</p>`:""}
+          ${seniorShortYears?`<p class="hint" style="color:var(--warn)">Not: Kıdemli bir unvanla birlikte "1 yıldan az" süre belirttiniz. Sonuçlar bu bilgiye göre hesaplandı; deneyim süresi puanınızı düşük tutmuş olabilir.</p>`:""}
         </div>
       </div>
     </div>
@@ -1181,6 +1227,7 @@ function renderReport(){
 
     <div class="sec c3">
       <h3>${ico("gap")}Boşluk Analizi (Gap Analysis)</h3>
+      <p class="hint" style="margin-top:0">Referans: ${esc(t.n)} beklentileri. Beceri boyutlarında ${TOL.dim} puana, Dreyfus'ta ${TOL.dreyfus} seviyeye kadar fark "karşılıyor" sayılır.</p>
       <div class="two">
         <div>
           <p style="margin:0 0 6px;font-weight:600;color:var(--good)">Güçlü yönleriniz</p>
@@ -1202,10 +1249,9 @@ function renderReport(){
 
     <div class="sec c5">
       <h3>${ico("map")}Kariyer Yolu Haritası</h3>
-      ${R.routes.map((r,i)=>routeBlock(r,i===0)).join("")}
+      ${[...R.routes].sort((a,b)=>(b.id===t.type)-(a.id===t.type)).map(r=>routeBlock(r)).join("")}
       ${mismatch}
-      <p style="margin:12px 0 4px"><strong>${toField?"Saha Servis Mühendisliğine geçiş":esc(top.n)}</strong> ${toField?"için önerilen adımlar:":"rotası için önerilen adımlar:"}</p>
-      ${!toField&&top.id==="lateral"?`<p class="hint" style="margin-top:0">Rolünüze göre olası yatay hedefler: ${esc(LATERAL_DEST[R.family])}.</p>`:""}
+      <p style="margin:12px 0 4px"><strong>${esc(LABEL_BY_TARGET[t.id]||t.n)}</strong> için önerilen adımlar${R.lowFit?" (bir hedef değil, gelişim yönü olarak)":""}:</p>
       <div class="phases">
         ${phases.map(ph=>`<div class="phase"><h5>${ph[0]}</h5><ul>${ph[1].map(x=>`<li>${x}</li>`).join("")}</ul></div>`).join("")}
       </div>
